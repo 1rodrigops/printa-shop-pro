@@ -43,7 +43,7 @@ const Admin = () => {
     setLoading(false);
   };
 
-  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+  const updateOrderStatus = async (orderId: string, newStatus: 'pending' | 'processing' | 'completed' | 'cancelled') => {
     const { error } = await supabase
       .from('orders')
       .update({ status: newStatus })
@@ -207,7 +207,7 @@ const Admin = () => {
                       <div className="md:col-span-1 flex flex-col gap-2">
                         <Select
                           value={order.status}
-                          onValueChange={(value) => updateOrderStatus(order.id, value)}
+                          onValueChange={(value) => updateOrderStatus(order.id, value as 'pending' | 'processing' | 'completed' | 'cancelled')}
                         >
                           <SelectTrigger>
                             <SelectValue />
