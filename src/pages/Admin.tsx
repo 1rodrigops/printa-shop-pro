@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
-import { Package, Clock, CheckCircle, XCircle, DollarSign, TrendingUp, Calendar, ShoppingBag, LogOut } from "lucide-react";
+import { Package, Clock, CheckCircle, XCircle, DollarSign, TrendingUp, Calendar, ShoppingBag, LogOut, BarChart3 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
 import type { User } from '@supabase/supabase-js';
 import { ActivityLog } from "@/components/admin/ActivityLog";
@@ -248,6 +248,15 @@ const Admin = () => {
           </div>
           
           <div className="flex items-center gap-4">
+            <Button 
+              variant="default" 
+              onClick={() => navigate("/admin/relatorios")}
+              className="flex items-center gap-2"
+            >
+              <BarChart3 className="w-4 h-4" />
+              Relatórios de Desempenho
+            </Button>
+            
             <Select value={period} onValueChange={(value: any) => setPeriod(value)}>
               <SelectTrigger className="w-48">
                 <Calendar className="w-4 h-4 mr-2" />

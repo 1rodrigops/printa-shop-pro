@@ -101,6 +101,42 @@ export type Database = {
         }
         Relationships: []
       }
+      relatorios_admin: {
+        Row: {
+          arquivo_pdf_url: string | null
+          created_at: string | null
+          dados_json: Json
+          data_fim: string
+          data_geracao: string | null
+          data_inicio: string
+          gerado_por: string | null
+          id: string
+          periodo: string
+        }
+        Insert: {
+          arquivo_pdf_url?: string | null
+          created_at?: string | null
+          dados_json: Json
+          data_fim: string
+          data_geracao?: string | null
+          data_inicio: string
+          gerado_por?: string | null
+          id?: string
+          periodo: string
+        }
+        Update: {
+          arquivo_pdf_url?: string | null
+          created_at?: string | null
+          dados_json?: Json
+          data_fim?: string
+          data_geracao?: string | null
+          data_inicio?: string
+          gerado_por?: string | null
+          id?: string
+          periodo?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -127,6 +163,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calcular_metricas_relatorio: {
+        Args: { data_fim: string; data_inicio: string }
+        Returns: Json
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
