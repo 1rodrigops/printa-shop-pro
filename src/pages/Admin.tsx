@@ -83,16 +83,16 @@ const Admin = () => {
       
       setUser(session.user);
       
-      // Check if user has admin role
+      // Check if user has admin or superadmin role
       const { data: roleData, error } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', session.user.id)
-        .eq('role', 'admin')
-        .single();
+        .in('role', ['admin', 'superadmin'])
+        .maybeSingle();
       
       if (error || !roleData) {
-        toast.error("Acesso negado. Você não tem permissão de administrador.");
+        toast.error("Acesso negado. Entre em contato com o administrador para obter permissões.");
         navigate("/");
         return;
       }
