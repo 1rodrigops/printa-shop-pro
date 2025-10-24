@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,26 +15,56 @@ const authSchema = z.object({
 });
 
 const Auth = () => {
-  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const navigate = useNavigate();
+
+  const redirectBasedOnRole = async (userId: string) => {
+    try {
+      const { data: roleData, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .single();
+
+      if (error || !roleData) {
+        navigate("/");
+        return;
+      }
+
+      const role = roleData.role;
+      
+      toast.success(`Bem-vindo! Seu nível de acesso é: ${role}`);
+
+      if (role === "superadmin" || role === "admin") {
+        navigate("/admin");
+      } else if (role === "cliente") {
+        navigate("/meu-pedido");
+      } else {
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("Error checking role:", error);
+      navigate("/");
+    }
+  };
 
   useEffect(() => {
-    // Check if user is already logged in
-    const checkUser = async () => {
+    const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate("/admin");
+        redirectBasedOnRole(session.user.id);
       }
     };
-    checkUser();
+    
+    checkSession();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
-        navigate("/admin");
+        redirectBasedOnRole(session.user.id);
       }
     });
 
@@ -46,11 +76,10 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // Validate input
       const validatedData = authSchema.parse({ email, password });
 
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: validatedData.email,
           password: validatedData.password,
         });
@@ -63,17 +92,22 @@ const Auth = () => {
           }
           return;
         }
-
-        toast.success("Login realizado com sucesso!");
+        
+        if (data.user) {
+          await redirectBasedOnRole(data.user.id);
+        }
       } else {
         const redirectUrl = `${window.location.origin}/`;
         
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: validatedData.email,
           password: validatedData.password,
           options: {
-            emailRedirectTo: redirectUrl
-          }
+            emailRedirectTo: redirectUrl,
+            data: {
+              name: name,
+            },
+          },
         });
 
         if (error) {
@@ -85,7 +119,9 @@ const Auth = () => {
           return;
         }
 
-        toast.success("Conta criada com sucesso!");
+        toast.success("Conta criada com sucesso! Você já pode fazer login.");
+        setIsLogin(true);
+        setName("");
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -109,17 +145,31 @@ const Auth = () => {
           </div>
           <div>
             <CardTitle className="text-2xl">
-              {isLogin ? "Admin Login" : "Criar Conta Admin"}
+              {isLogin ? "Entrar" : "Criar Conta"}
             </CardTitle>
             <CardDescription>
               {isLogin 
-                ? "Entre com suas credenciais para acessar o painel" 
-                : "Crie uma conta para gerenciar pedidos"}
+                ? "Entre com suas credenciais para acessar o sistema" 
+                : "Crie uma conta para começar"}
             </CardDescription>
           </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="name">Nome</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Seu nome"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required={!isLogin}
+                  disabled={loading}
+                />
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
