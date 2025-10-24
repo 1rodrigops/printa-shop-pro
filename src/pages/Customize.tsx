@@ -5,17 +5,32 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Check, MessageCircle, Shirt, Sparkles, Package, Image as ImageIcon } from "lucide-react";
+import { Upload, Check, MessageCircle, Shirt, Sparkles, Package, Image as ImageIcon, Plus, Minus } from "lucide-react";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 
 type PrintType = "front" | "both";
 type FabricType = "cotton" | "dryfit" | "premium";
+type SizeQuantities = {
+  PP: number;
+  P: number;
+  M: number;
+  G: number;
+  GG: number;
+  XG: number;
+};
 
 const Customize = () => {
   const [printType, setPrintType] = useState<PrintType>("front");
   const [fabricType, setFabricType] = useState<FabricType>("cotton");
-  const [quantity, setQuantity] = useState(1);
+  const [sizeQuantities, setSizeQuantities] = useState<SizeQuantities>({
+    PP: 0,
+    P: 0,
+    M: 0,
+    G: 0,
+    GG: 0,
+    XG: 0,
+  });
   const [previewColor, setPreviewColor] = useState("#FFFFFF");
   const [frontImage, setFrontImage] = useState<File | null>(null);
   const [backImage, setBackImage] = useState<File | null>(null);
@@ -26,7 +41,6 @@ const Customize = () => {
     customerName: "",
     customerEmail: "",
     customerPhone: "",
-    shirtSize: "",
   });
 
   const colors = [
@@ -37,7 +51,7 @@ const Customize = () => {
     { name: "Vermelho", hex: "#DC2626" },
   ];
 
-  const sizes = ["P", "M", "G", "GG", "XG"];
+  const sizes: (keyof SizeQuantities)[] = ["PP", "P", "M", "G", "GG", "XG"];
 
   const fabricOptions = [
     { 
@@ -69,13 +83,32 @@ const Customize = () => {
     return fabric?.price || 0;
   };
 
+  const getTotalQuantity = () => {
+    return Object.values(sizeQuantities).reduce((sum, qty) => sum + qty, 0);
+  };
+
   const calculateUnitPrice = () => {
-    if (quantity >= 10) return 70;
+    const totalQty = getTotalQuantity();
+    if (totalQty >= 10) return 70;
     return calculateBasePrice() + calculateFabricPrice();
   };
 
   const calculateTotal = () => {
-    return calculateUnitPrice() * quantity;
+    return calculateUnitPrice() * getTotalQuantity();
+  };
+
+  const updateSizeQuantity = (size: keyof SizeQuantities, delta: number) => {
+    setSizeQuantities(prev => ({
+      ...prev,
+      [size]: Math.max(0, prev[size] + delta)
+    }));
+  };
+
+  const setSizeQuantityDirect = (size: keyof SizeQuantities, value: number) => {
+    setSizeQuantities(prev => ({
+      ...prev,
+      [size]: Math.max(0, value)
+    }));
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back") => {
@@ -113,8 +146,9 @@ const Customize = () => {
       return;
     }
 
-    if (!formData.shirtSize) {
-      toast.error("Por favor, escolha o tamanho!");
+    const totalQty = getTotalQuantity();
+    if (totalQty === 0) {
+      toast.error("Por favor, selecione ao menos uma quantidade em um tamanho para continuar!");
       return;
     }
 
@@ -122,13 +156,18 @@ const Customize = () => {
     const fabric = fabricOptions.find(f => f.id === fabricType);
     const selectedColor = colors.find(c => c.hex === previewColor);
     
+    // Montar lista de tamanhos
+    const sizesText = sizes
+      .filter(size => sizeQuantities[size] > 0)
+      .map(size => `${sizeQuantities[size]} ${size}`)
+      .join(", ");
+    
     const message = `Olá! Gostaria de formalizar meu pedido de camisetas personalizadas.
 
 • Tipo de estampa: ${printType === "front" ? "Somente Frente" : "Frente e Verso"}
 • Tecido: ${fabric?.name}
-• Quantidade: ${quantity} ${quantity === 1 ? "unidade" : "unidades"}
+• Tamanhos: ${sizesText} (Total: ${totalQty} ${totalQty === 1 ? "unidade" : "unidades"})
 • Cor: ${selectedColor?.name || "Branco"}
-• Tamanho: ${formData.shirtSize}
 • Nome: ${formData.customerName}
 • Email: ${formData.customerEmail}
 • Telefone: ${formData.customerPhone}
@@ -337,55 +376,69 @@ Aguardo o link de pagamento e aprovação do layout!`;
                 </Card>
               )}
 
-              {/* Quantidade */}
+              {/* Tamanhos com Quantidade */}
               <Card className="border-2 border-primary/20">
                 <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
                   <CardTitle className="flex items-center gap-2">
                     <Package className="w-5 h-5" />
-                    Quantidade desejada
+                    Escolha os tamanhos e quantidades *
                   </CardTitle>
-                  {quantity >= 10 && (
+                  {getTotalQuantity() >= 10 && (
                     <Badge className="w-fit bg-accent text-accent-foreground">
                       🎉 Desconto automático aplicado!
                     </Badge>
                   )}
                 </CardHeader>
-                <CardContent className="pt-6">
-                  <Input
-                    type="number"
-                    min="1"
-                    value={quantity}
-                    onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                    className="text-lg"
-                  />
-                  <p className="text-sm text-muted-foreground mt-3">
-                    💡 <strong>Desconto automático para pedidos com 10 ou mais camisetas:</strong> R$ 70,00 cada (independente do tipo de estampa ou tecido)
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* Tamanho */}
-              <Card className="border-2 border-primary/20">
-                <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
-                  <CardTitle>Escolha o Tamanho *</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-6">
-                  <div className="grid grid-cols-5 gap-2">
+                <CardContent className="pt-6 space-y-4">
+                  <div className="grid gap-3">
                     {sizes.map((size) => (
-                      <button
+                      <div 
                         key={size}
-                        type="button"
-                        onClick={() => setFormData({...formData, shirtSize: size})}
-                        className={`p-4 rounded-lg border-2 font-semibold transition-all hover:scale-105 ${
-                          formData.shirtSize === size
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "border-border hover:border-primary/50"
-                        }`}
+                        className="flex items-center justify-between border-2 border-border rounded-lg p-4 hover:border-primary/50 transition-colors"
                       >
-                        {size}
-                      </button>
+                        <div className="font-semibold text-lg min-w-[50px]">{size}</div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => updateSizeQuantity(size, -1)}
+                            disabled={sizeQuantities[size] === 0}
+                            className="h-8 w-8"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                          <Input
+                            type="number"
+                            min="0"
+                            value={sizeQuantities[size]}
+                            onChange={(e) => setSizeQuantityDirect(size, parseInt(e.target.value) || 0)}
+                            className="w-20 text-center text-lg font-semibold"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => updateSizeQuantity(size, 1)}
+                            className="h-8 w-8"
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     ))}
                   </div>
+                  
+                  <div className="bg-primary/10 border-2 border-primary/20 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-lg">Total de camisetas:</span>
+                      <span className="text-2xl font-bold text-primary">{getTotalQuantity()} unidades</span>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-muted-foreground">
+                    💡 <strong>Desconto automático para pedidos com 10 ou mais camisetas:</strong> R$ 70,00 cada (independente do tipo de estampa ou tecido)
+                  </p>
                 </CardContent>
               </Card>
 
@@ -464,7 +517,7 @@ Aguardo o link de pagamento e aprovação do layout!`;
                   
                   <div className="flex justify-between pb-2 border-b">
                     <span className="text-muted-foreground">Quantidade:</span>
-                    <span className="font-semibold">{quantity} {quantity === 1 ? "unidade" : "unidades"}</span>
+                    <span className="font-semibold">{getTotalQuantity()} {getTotalQuantity() === 1 ? "unidade" : "unidades"}</span>
                   </div>
                   
                   <div className="flex justify-between pb-2 border-b">
@@ -473,8 +526,13 @@ Aguardo o link de pagamento e aprovação do layout!`;
                   </div>
                   
                   <div className="flex justify-between pb-2 border-b">
-                    <span className="text-muted-foreground">Tamanho:</span>
-                    <span className="font-semibold">{formData.shirtSize || "—"}</span>
+                    <span className="text-muted-foreground">Tamanhos:</span>
+                    <span className="font-semibold">
+                      {sizes
+                        .filter(size => sizeQuantities[size] > 0)
+                        .map(size => `${sizeQuantities[size]} ${size}`)
+                        .join(", ") || "—"}
+                    </span>
                   </div>
                 </div>
 
@@ -489,7 +547,7 @@ Aguardo o link de pagamento e aprovação do layout!`;
                     <span className="text-primary">R$ {calculateTotal().toFixed(2)}</span>
                   </div>
                   
-                  {quantity >= 10 && (
+                  {getTotalQuantity() >= 10 && (
                     <Badge className="w-full mt-3 justify-center bg-accent text-accent-foreground">
                       🎉 Desconto aplicado!
                     </Badge>
