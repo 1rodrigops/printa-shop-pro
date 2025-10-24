@@ -30,8 +30,10 @@ interface Order {
 const Admin = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [period, setPeriod] = useState<"7d" | "30d" | "90d" | "all">("30d");
 
   const fetchOrders = async () => {
@@ -65,14 +67,34 @@ const Admin = () => {
   };
 
   useEffect(() => {
-    // Check authentication
+    // Check authentication and admin role
     const checkAuth = async () => {
+      setCheckingAuth(true);
       const { data: { session } } = await supabase.auth.getSession();
+      
       if (!session) {
         navigate("/auth");
         return;
       }
+      
       setUser(session.user);
+      
+      // Check if user has admin role
+      const { data: roleData, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .eq('role', 'admin')
+        .single();
+      
+      if (error || !roleData) {
+        toast.error("Acesso negado. Você não tem permissão de administrador.");
+        navigate("/");
+        return;
+      }
+      
+      setIsAdmin(true);
+      setCheckingAuth(false);
     };
     
     checkAuth();
@@ -90,10 +112,10 @@ const Admin = () => {
   }, [navigate]);
 
   useEffect(() => {
-    if (user) {
+    if (user && isAdmin) {
       fetchOrders();
     }
-  }, [user]);
+  }, [user, isAdmin]);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -105,8 +127,15 @@ const Admin = () => {
     }
   };
 
-  if (!user) {
-    return null; // or loading spinner
+  if (checkingAuth || !user || !isAdmin) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Verificando permissões...</p>
+        </div>
+      </div>
+    );
   }
 
   const getStatusBadge = (status: string) => {
