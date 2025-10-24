@@ -106,8 +106,28 @@ const Customize = () => {
 
       if (error) throw error;
 
+      // Enviar notificação via WhatsApp
+      try {
+        await supabase.functions.invoke('send-whatsapp', {
+          body: {
+            phone: formData.customerPhone,
+            customerName: formData.customerName,
+            orderDetails: {
+              quantity: parseInt(formData.quantity),
+              shirtColor: formData.shirtColor,
+              shirtSize: formData.shirtSize,
+              totalPrice: totalPrice
+            }
+          }
+        });
+        console.log('Notificação WhatsApp enviada');
+      } catch (whatsappError: any) {
+        console.error('Erro ao enviar WhatsApp:', whatsappError);
+        // Não bloqueia o pedido se o WhatsApp falhar
+      }
+
       toast.success("Pedido criado com sucesso!", {
-        description: "Em breve entraremos em contato!"
+        description: "Você receberá uma confirmação no WhatsApp!"
       });
 
       // Resetar formulário
