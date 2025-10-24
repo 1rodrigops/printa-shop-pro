@@ -11,6 +11,9 @@ import Navbar from "@/components/Navbar";
 import { Package, Clock, CheckCircle, XCircle, DollarSign, TrendingUp, Calendar, ShoppingBag, LogOut } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
 import type { User } from '@supabase/supabase-js';
+import { ActivityLog } from "@/components/admin/ActivityLog";
+import { ActivityStats } from "@/components/admin/ActivityStats";
+import { useAdminActivity } from "@/hooks/useAdminActivity";
 
 interface Order {
   id: string;
@@ -35,6 +38,7 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [period, setPeriod] = useState<"7d" | "30d" | "90d" | "all">("30d");
+  const { logLogin, logLogout } = useAdminActivity();
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -95,6 +99,9 @@ const Admin = () => {
       
       setIsAdmin(true);
       setCheckingAuth(false);
+      
+      // Log admin login
+      logLogin();
     };
     
     checkAuth();
@@ -114,10 +121,15 @@ const Admin = () => {
   useEffect(() => {
     if (user && isAdmin) {
       fetchOrders();
+      // Log that admin accessed the dashboard
+      logLogin();
     }
   }, [user, isAdmin]);
 
   const handleLogout = async () => {
+    // Log logout before signing out
+    await logLogout();
+    
     const { error } = await supabase.auth.signOut();
     if (error) {
       toast.error("Erro ao sair");
@@ -260,7 +272,10 @@ const Admin = () => {
           </div>
         </div>
 
-        {/* Estatísticas */}
+        {/* Cards de Atividade Recente */}
+        <ActivityStats />
+
+        {/* Estatísticas de Pedidos */}
         <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-2">
@@ -335,11 +350,12 @@ const Admin = () => {
           </Card>
         </div>
 
-        {/* Tabs para Relatórios e Pedidos */}
+        {/* Tabs para Relatórios, Pedidos e Atividade */}
         <Tabs defaultValue="reports" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsList className="grid w-full grid-cols-3 max-w-2xl">
             <TabsTrigger value="reports">Relatórios Financeiros</TabsTrigger>
             <TabsTrigger value="orders">Gerenciar Pedidos</TabsTrigger>
+            <TabsTrigger value="activity">Atividade Recente</TabsTrigger>
           </TabsList>
 
           <TabsContent value="reports" className="space-y-6">
@@ -526,6 +542,11 @@ const Admin = () => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="activity">
+            {/* Atividade Recente */}
+            <ActivityLog limit={20} />
           </TabsContent>
         </Tabs>
       </div>

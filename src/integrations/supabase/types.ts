@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_activity_log: {
+        Row: {
+          action_detail: string
+          action_type: string
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          result: string | null
+          timestamp: string
+          user_email: string
+          user_id: string | null
+        }
+        Insert: {
+          action_detail: string
+          action_type: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          result?: string | null
+          timestamp?: string
+          user_email: string
+          user_id?: string | null
+        }
+        Update: {
+          action_detail?: string
+          action_type?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          result?: string | null
+          timestamp?: string
+          user_email?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           created_at: string
@@ -94,6 +133,16 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      log_admin_activity: {
+        Args: {
+          p_action_detail: string
+          p_action_type: string
+          p_ip_address?: string
+          p_metadata?: Json
+          p_result?: string
+        }
+        Returns: string
       }
     }
     Enums: {
