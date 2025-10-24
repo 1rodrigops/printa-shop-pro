@@ -7,6 +7,9 @@ import heroImage from "@/assets/hero-tshirts.jpg";
 import shirtModel1 from "@/assets/shirt-model-1.jpg";
 import shirtModel2 from "@/assets/shirt-model-2.jpg";
 import shirtModel3 from "@/assets/shirt-model-3.jpg";
+import fabricCotton from "@/assets/fabric-cotton.jpg";
+import fabricDryfit from "@/assets/fabric-dryfit.jpg";
+import fabricPremium from "@/assets/fabric-premium.jpg";
 
 const Index = () => {
   const features = [
@@ -192,6 +195,119 @@ const Index = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Tipos de Tecidos */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4">
+              👕 Trabalhamos com os melhores tecidos para sua camiseta personalizada
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Escolha o tecido ideal para seu conforto, estilo e ocasião
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            {/* Algodão Tradicional */}
+            <Card className="overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+              <div className="relative overflow-hidden h-64">
+                <img 
+                  src={fabricCotton} 
+                  alt="Tecido 100% algodão com textura natural e suave" 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-semibold">
+                  🪶 Clássico
+                </div>
+              </div>
+              <CardContent className="p-6">
+                <h3 className="text-2xl font-bold mb-3 flex items-center gap-2">
+                  🧵 Algodão Tradicional
+                </h3>
+                <p className="text-muted-foreground mb-4 leading-relaxed">
+                  Tecido 100% algodão com toque suave e respirável. 
+                  Ideal para uso diário, conforto e durabilidade.
+                </p>
+                <div className="bg-primary/10 border border-primary/20 rounded-lg p-3">
+                  <p className="text-sm font-semibold text-primary">
+                    💬 Perfeito para brindes e uso casual
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Dry Fit Esportivo */}
+            <Card className="overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+              <div className="relative overflow-hidden h-64">
+                <img 
+                  src={fabricDryfit} 
+                  alt="Tecido dry fit esportivo com textura microperfurada que seca rápido" 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute top-4 right-4 bg-secondary text-white px-3 py-1 rounded-full text-sm font-semibold">
+                  💨 Performance
+                </div>
+              </div>
+              <CardContent className="p-6">
+                <h3 className="text-2xl font-bold mb-3 flex items-center gap-2">
+                  ⚡ Dry Fit Esportivo
+                </h3>
+                <p className="text-muted-foreground mb-4 leading-relaxed">
+                  Tecido leve e ventilado que seca rápido. 
+                  Excelente para eventos, uniformes e atividades externas.
+                </p>
+                <div className="bg-secondary/10 border border-secondary/20 rounded-lg p-3">
+                  <p className="text-sm font-semibold text-secondary">
+                    💬 Alta performance e conforto térmico
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Premium Soft Touch */}
+            <Card className="overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+              <div className="relative overflow-hidden h-64">
+                <img 
+                  src={fabricPremium} 
+                  alt="Tecido premium soft touch com acabamento sofisticado e toque macio" 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute top-4 right-4 bg-accent text-white px-3 py-1 rounded-full text-sm font-semibold">
+                  ✨ Premium
+                </div>
+              </div>
+              <CardContent className="p-6">
+                <h3 className="text-2xl font-bold mb-3 flex items-center gap-2">
+                  👔 Premium Soft Touch
+                </h3>
+                <p className="text-muted-foreground mb-4 leading-relaxed">
+                  Tecido premium com toque macio e caimento sofisticado. 
+                  Perfeito para uniformes empresariais e linhas premium.
+                </p>
+                <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
+                  <p className="text-sm font-semibold text-accent">
+                    💬 Visual elegante, toque exclusivo
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* CTA para Personalização */}
+          <div className="text-center space-y-4">
+            <Link to="/personalizar">
+              <Button variant="gradient" size="xl" className="group">
+                🛒 Personalize sua camiseta agora
+                <CheckCircle2 className="ml-2 group-hover:rotate-12 transition-transform" />
+              </Button>
+            </Link>
+            <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
+              Escolha o tecido, o tipo de estampa e o tamanho ideal. Envie sua arte e receba seu pedido com aprovação pelo WhatsApp!
+            </p>
           </div>
         </div>
       </section>
