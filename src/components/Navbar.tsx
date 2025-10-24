@@ -37,6 +37,14 @@ const Navbar = ({ cartItemsCount = 0 }: NavbarProps) => {
             Personalizar
           </Link>
           <Link 
+            to="/envio" 
+            className={`text-sm font-medium transition-colors hover:text-primary ${
+              location.pathname === "/envio" ? "text-primary" : "text-foreground"
+            }`}
+          >
+            Envio
+          </Link>
+          <Link 
             to="/admin" 
             className={`text-sm font-medium transition-colors hover:text-primary ${
               location.pathname === "/admin" ? "text-primary" : "text-foreground"
