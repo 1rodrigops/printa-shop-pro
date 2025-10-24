@@ -4,6 +4,9 @@ import { CheckCircle2, Palette, Upload, ShoppingBag } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import heroImage from "@/assets/hero-tshirts.jpg";
+import shirtModel1 from "@/assets/shirt-model-1.jpg";
+import shirtModel2 from "@/assets/shirt-model-2.jpg";
+import shirtModel3 from "@/assets/shirt-model-3.jpg";
 
 const Index = () => {
   const features = [
@@ -104,8 +107,97 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Cores Disponíveis */}
+      {/* Modelos de Produtos */}
       <section className="py-20 px-4">
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4">Modelos em Destaque</h2>
+            <p className="text-muted-foreground text-lg">
+              Confira alguns exemplos de camisas personalizadas
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card className="overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+              <div className="relative overflow-hidden">
+                <img 
+                  src={shirtModel1} 
+                  alt="Camisa branca com design geométrico colorido" 
+                  className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold mb-2">Geometria Abstrata</h3>
+                <p className="text-muted-foreground mb-4">
+                  Design moderno com formas geométricas coloridas
+                </p>
+                <div className="flex justify-between items-center">
+                  <span className="text-2xl font-bold text-primary">R$ 79,90</span>
+                  <Link to="/personalizar">
+                    <Button variant="secondary" size="sm">
+                      Personalizar
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+              <div className="relative overflow-hidden">
+                <img 
+                  src={shirtModel2} 
+                  alt="Camisa preta com arte neon urbana" 
+                  className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold mb-2">Neon Street Art</h3>
+                <p className="text-muted-foreground mb-4">
+                  Arte urbana vibrante com efeitos neon
+                </p>
+                <div className="flex justify-between items-center">
+                  <span className="text-2xl font-bold text-primary">R$ 79,90</span>
+                  <Link to="/personalizar">
+                    <Button variant="secondary" size="sm">
+                      Personalizar
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+              <div className="relative overflow-hidden">
+                <img 
+                  src={shirtModel3} 
+                  alt="Camisa azul com paisagem minimalista" 
+                  className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold mb-2">Paisagem Natural</h3>
+                <p className="text-muted-foreground mb-4">
+                  Design minimalista inspirado na natureza
+                </p>
+                <div className="flex justify-between items-center">
+                  <span className="text-2xl font-bold text-primary">R$ 79,90</span>
+                  <Link to="/personalizar">
+                    <Button variant="secondary" size="sm">
+                      Personalizar
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Cores Disponíveis */}
+      <section className="py-20 px-4 bg-muted/50">
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4">Cores Disponíveis</h2>
