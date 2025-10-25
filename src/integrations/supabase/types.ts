@@ -496,6 +496,62 @@ export type Database = {
         }
         Relationships: []
       }
+      quality_control_log: {
+        Row: {
+          aprovado: boolean | null
+          checklist: Json
+          created_at: string | null
+          data_hora: string
+          fotos: string[] | null
+          id: string
+          mensagem_enviada: boolean | null
+          observacoes: string | null
+          operador: string | null
+          operador_id: string | null
+          pedido_id: string
+          rastreio: string | null
+          transportadora: string | null
+        }
+        Insert: {
+          aprovado?: boolean | null
+          checklist?: Json
+          created_at?: string | null
+          data_hora?: string
+          fotos?: string[] | null
+          id?: string
+          mensagem_enviada?: boolean | null
+          observacoes?: string | null
+          operador?: string | null
+          operador_id?: string | null
+          pedido_id: string
+          rastreio?: string | null
+          transportadora?: string | null
+        }
+        Update: {
+          aprovado?: boolean | null
+          checklist?: Json
+          created_at?: string | null
+          data_hora?: string
+          fotos?: string[] | null
+          id?: string
+          mensagem_enviada?: boolean | null
+          observacoes?: string | null
+          operador?: string | null
+          operador_id?: string | null
+          pedido_id?: string
+          rastreio?: string | null
+          transportadora?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quality_control_log_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       relatorios_admin: {
         Row: {
           arquivo_pdf_url: string | null

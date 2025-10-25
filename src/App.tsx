@@ -20,6 +20,7 @@ import Pedidos from "./pages/Pedidos";
 import VendasDoDia from "./pages/VendasDoDia";
 import HistoricoPedidos from "./pages/HistoricoPedidos";
 import ProducaoInterna from "./pages/ProducaoInterna";
+import QualidadeEntrega from "./pages/QualidadeEntrega";
 import Financeiro from "./pages/Financeiro";
 import Estoque from "./pages/Estoque";
 import Utilidades from "./pages/Utilidades";
@@ -56,6 +57,7 @@ const App = () => (
           <Route path="/admin/vendas/diarias" element={<VendasDoDia />} />
           <Route path="/admin/vendas/historico" element={<HistoricoPedidos />} />
           <Route path="/admin/vendas/producao" element={<ProducaoInterna />} />
+          <Route path="/admin/vendas/qualidade-entrega" element={<QualidadeEntrega />} />
           <Route path="/admin/financeiro" element={<Financeiro />} />
           <Route path="/admin/estoque" element={<Estoque />} />
           <Route path="/admin/relatorios" element={<Reports />} />
