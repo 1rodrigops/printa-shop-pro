@@ -113,6 +113,12 @@ const menuItems: MenuItem[] = [
     name: "Utilidades",
     path: "/admin/utilidades",
     allowedRoles: ["superadmin"],
+    submenu: [
+      { icon: Settings, name: "Configurações", path: "/admin/utilidades/configuracoes", allowedRoles: ["superadmin"] },
+      { icon: Package, name: "Backup", path: "/admin/utilidades/backup", allowedRoles: ["superadmin"] },
+      { icon: FileText, name: "Logs do Sistema", path: "/admin/utilidades/logs", allowedRoles: ["superadmin"] },
+      { icon: Bell, name: "API WhatsApp", path: "/admin/utilidades/api-whatsapp", allowedRoles: ["superadmin"] },
+    ],
   },
   {
     icon: FileText,

@@ -20,6 +20,10 @@ import Financeiro from "./pages/Financeiro";
 import Estoque from "./pages/Estoque";
 import Utilidades from "./pages/Utilidades";
 import Fornecedores from "./pages/Fornecedores";
+import ApiWhatsApp from "./pages/ApiWhatsApp";
+import ConfiguracoesGerais from "./pages/ConfiguracoesGerais";
+import BackupSistema from "./pages/BackupSistema";
+import LogsSistema from "./pages/LogsSistema";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +51,10 @@ const App = () => (
           <Route path="/admin/estoque" element={<Estoque />} />
           <Route path="/admin/relatorios" element={<Reports />} />
           <Route path="/admin/utilidades" element={<Utilidades />} />
+          <Route path="/admin/utilidades/configuracoes" element={<ConfiguracoesGerais />} />
+          <Route path="/admin/utilidades/backup" element={<BackupSistema />} />
+          <Route path="/admin/utilidades/logs" element={<LogsSistema />} />
+          <Route path="/admin/utilidades/api-whatsapp" element={<ApiWhatsApp />} />
           <Route path="/meu-pedido" element={<MyOrder />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
