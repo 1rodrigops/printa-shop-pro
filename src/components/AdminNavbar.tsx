@@ -76,7 +76,7 @@ const menuItems: MenuItem[] = [
   },
   {
     icon: DollarSign,
-    name: "Vendas",
+    name: "🧾 Vendas",
     path: "/admin/vendas",
     allowedRoles: ["superadmin", "admin"],
   },
