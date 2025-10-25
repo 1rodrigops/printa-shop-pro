@@ -155,6 +155,42 @@ export type Database = {
         }
         Relationships: []
       }
+      permissions_matrix: {
+        Row: {
+          can_delete: boolean | null
+          can_edit: boolean | null
+          can_export: boolean | null
+          can_view: boolean | null
+          created_at: string | null
+          id: string
+          module: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string | null
+        }
+        Insert: {
+          can_delete?: boolean | null
+          can_edit?: boolean | null
+          can_export?: boolean | null
+          can_view?: boolean | null
+          created_at?: string | null
+          id?: string
+          module: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+        }
+        Update: {
+          can_delete?: boolean | null
+          can_edit?: boolean | null
+          can_export?: boolean | null
+          can_view?: boolean | null
+          created_at?: string | null
+          id?: string
+          module?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       relatorios_admin: {
         Row: {
           arquivo_pdf_url: string | null

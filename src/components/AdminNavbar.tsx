@@ -16,7 +16,8 @@ import {
   Shirt,
   Users,
   Truck,
-  UserCog
+  UserCog,
+  Shield
 } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -69,6 +70,7 @@ const menuItems: MenuItem[] = [
       { icon: Users, name: "Clientes", path: "/admin/cadastro/clientes", allowedRoles: ["superadmin"] },
       { icon: Truck, name: "Fornecedores", path: "/admin/cadastro/fornecedores", allowedRoles: ["superadmin"] },
       { icon: UserCog, name: "Usuários", path: "/admin/cadastro/usuarios", allowedRoles: ["superadmin"] },
+      { icon: Shield, name: "Permissões", path: "/admin/cadastro/permissoes", allowedRoles: ["superadmin"] },
     ],
   },
   {
