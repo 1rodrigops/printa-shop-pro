@@ -1,15 +1,10 @@
 import { useState, useEffect } from "react";
 import AdminNavbar from "@/components/AdminNavbar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Loader2, CheckCircle2, XCircle, MessageSquare } from "lucide-react";
+import { Loader2, MessageSquare } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,6 +13,18 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { ConfiguracaoAPI } from "@/components/whatsapp/ConfiguracaoAPI";
+import { MensagensAutomaticas } from "@/components/whatsapp/MensagensAutomaticas";
+import { TesteEnvio } from "@/components/whatsapp/TesteEnvio";
+
+const mensagensPadrao = {
+  pedido_recebido: "Olá {{nome}}, recebemos seu pedido #{{id}}! Em breve enviaremos detalhes.",
+  seja_bem_vindo: "Olá {{nome}}, bem-vindo à StampShirts! Personalize suas camisetas conosco 👕✨",
+  pagamento_recebido: "Pagamento do pedido #{{id}} confirmado! Agora sua camiseta vai para a produção.",
+  em_producao: "Seu pedido #{{id}} está sendo estampado! 🔥",
+  em_transporte: "🚚 Seu pedido #{{id}} foi enviado! Acompanhe aqui: {{link_rastreamento}}",
+  finalizado: "🎉 Pedido #{{id}} entregue com sucesso! Esperamos que você ame sua camiseta ❤️",
+};
 
 const ApiWhatsApp = () => {
   const { role, loading: roleLoading } = useUserRole();
@@ -30,7 +37,10 @@ const ApiWhatsApp = () => {
     url: "",
     key: "",
     provider: "WuzAPI",
+    numeroWhatsApp: "",
   });
+
+  const [mensagens, setMensagens] = useState(mensagensPadrao);
 
   useEffect(() => {
     if (role === "superadmin") {
@@ -44,7 +54,18 @@ const ApiWhatsApp = () => {
       const { data, error } = await supabase
         .from("system_config")
         .select("*")
-        .in("config_key", ["api_whatsapp_url", "api_whatsapp_key", "api_whatsapp_provider"]);
+        .in("config_key", [
+          "api_whatsapp_url",
+          "api_whatsapp_key",
+          "api_whatsapp_provider",
+          "api_whatsapp_numero",
+          "msg_pedido_recebido",
+          "msg_seja_bem_vindo",
+          "msg_pagamento_recebido",
+          "msg_em_producao",
+          "msg_em_transporte",
+          "msg_finalizado"
+        ]);
 
       if (error) throw error;
 
@@ -58,6 +79,16 @@ const ApiWhatsApp = () => {
           url: config.api_whatsapp_url || "",
           key: config.api_whatsapp_key || "",
           provider: config.api_whatsapp_provider || "WuzAPI",
+          numeroWhatsApp: config.api_whatsapp_numero || "",
+        });
+
+        setMensagens({
+          pedido_recebido: config.msg_pedido_recebido || mensagensPadrao.pedido_recebido,
+          seja_bem_vindo: config.msg_seja_bem_vindo || mensagensPadrao.seja_bem_vindo,
+          pagamento_recebido: config.msg_pagamento_recebido || mensagensPadrao.pagamento_recebido,
+          em_producao: config.msg_em_producao || mensagensPadrao.em_producao,
+          em_transporte: config.msg_em_transporte || mensagensPadrao.em_transporte,
+          finalizado: config.msg_finalizado || mensagensPadrao.finalizado,
         });
       }
     } catch (error: any) {
@@ -80,6 +111,7 @@ const ApiWhatsApp = () => {
         { config_key: "api_whatsapp_url", config_value: formData.url, config_category: "whatsapp", description: "URL do servidor WhatsApp API", updated_by: user?.id },
         { config_key: "api_whatsapp_key", config_value: formData.key, config_category: "whatsapp", description: "Chave de API global WhatsApp", updated_by: user?.id },
         { config_key: "api_whatsapp_provider", config_value: formData.provider, config_category: "whatsapp", description: "Provedor de API WhatsApp", updated_by: user?.id },
+        { config_key: "api_whatsapp_numero", config_value: formData.numeroWhatsApp, config_category: "whatsapp", description: "Número de WhatsApp remetente", updated_by: user?.id },
       ];
 
       for (const update of updates) {
@@ -93,6 +125,43 @@ const ApiWhatsApp = () => {
       toast({
         title: "Configurações salvas",
         description: "As configurações da API WhatsApp foram atualizadas com sucesso.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao salvar",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveMensagens = async () => {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const updates = [
+        { config_key: "msg_pedido_recebido", config_value: mensagens.pedido_recebido, config_category: "whatsapp_messages", description: "Mensagem: Pedido Recebido", updated_by: user?.id },
+        { config_key: "msg_seja_bem_vindo", config_value: mensagens.seja_bem_vindo, config_category: "whatsapp_messages", description: "Mensagem: Seja Bem-Vindo", updated_by: user?.id },
+        { config_key: "msg_pagamento_recebido", config_value: mensagens.pagamento_recebido, config_category: "whatsapp_messages", description: "Mensagem: Pagamento Recebido", updated_by: user?.id },
+        { config_key: "msg_em_producao", config_value: mensagens.em_producao, config_category: "whatsapp_messages", description: "Mensagem: Em Produção", updated_by: user?.id },
+        { config_key: "msg_em_transporte", config_value: mensagens.em_transporte, config_category: "whatsapp_messages", description: "Mensagem: Em Transporte", updated_by: user?.id },
+        { config_key: "msg_finalizado", config_value: mensagens.finalizado, config_category: "whatsapp_messages", description: "Mensagem: Finalizado", updated_by: user?.id },
+      ];
+
+      for (const update of updates) {
+        const { error } = await supabase
+          .from("system_config")
+          .upsert(update, { onConflict: "config_key" });
+
+        if (error) throw error;
+      }
+
+      toast({
+        title: "Mensagens salvas",
+        description: "As mensagens automáticas foram atualizadas com sucesso.",
       });
     } catch (error: any) {
       toast({
@@ -132,10 +201,6 @@ const ApiWhatsApp = () => {
           success: true,
           message: "✅ Conexão estabelecida com sucesso! API WhatsApp está funcionando.",
         });
-        toast({
-          title: "Teste bem-sucedido",
-          description: "A conexão com a API WhatsApp foi estabelecida.",
-        });
       } else {
         setTestResult({
           success: false,
@@ -152,13 +217,70 @@ const ApiWhatsApp = () => {
     }
   };
 
+  const handleTestNumber = async () => {
+    if (!formData.url || !formData.key || !formData.numeroWhatsApp) {
+      toast({
+        title: "Dados incompletos",
+        description: "Preencha todos os campos antes de testar o número.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setTesting(true);
+    setTestResult(null);
+
+    try {
+      const numeroLimpo = formData.numeroWhatsApp.replace(/[\s\(\)\-]/g, '');
+      const response = await fetch(`${formData.url}/instance/info?number=${numeroLimpo}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${formData.key}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        setTestResult({
+          success: true,
+          message: "✅ Número ativo e conectado",
+        });
+        toast({
+          title: "Número válido",
+          description: "O número está ativo e conectado.",
+        });
+      } else {
+        setTestResult({
+          success: false,
+          message: "❌ Não encontrado ou desconectado",
+        });
+      }
+    } catch (error: any) {
+      setTestResult({
+        success: false,
+        message: `❌ Erro ao verificar número: ${error.message}`,
+      });
+    } finally {
+      setTesting(false);
+    }
+  };
+
   const handleReset = () => {
     setFormData({
       url: "",
       key: "",
       provider: "WuzAPI",
+      numeroWhatsApp: "",
     });
     setTestResult(null);
+  };
+
+  const handleRestaurarMensagens = () => {
+    setMensagens(mensagensPadrao);
+    toast({
+      title: "Mensagens restauradas",
+      description: "As mensagens foram restauradas para os valores padrão.",
+    });
   };
 
   if (roleLoading) {
@@ -209,84 +331,32 @@ const ApiWhatsApp = () => {
           <h1 className="text-3xl font-bold">API WhatsApp</h1>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Configuração da API WhatsApp</CardTitle>
-            <CardDescription>
-              Configure a integração com sua API de WhatsApp. Exemplo: WuzAPI (
-              <a href="https://github.com/asternic/wuzapi" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-                GitHub
-              </a>
-              ) ou Evolution API (
-              <a href="https://github.com/EvolutionAPI/evolution-api" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-                GitHub
-              </a>
-              ). Insira a URL de base e a chave de API concedida pela plataforma.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="provider">Provedor de API</Label>
-              <Select value={formData.provider} onValueChange={(value) => setFormData({ ...formData, provider: value })}>
-                <SelectTrigger id="provider">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="WuzAPI">WuzAPI</SelectItem>
-                  <SelectItem value="Evolution API">Evolution API</SelectItem>
-                  <SelectItem value="Outro">Outro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="space-y-6">
+          <ConfiguracaoAPI
+            formData={formData}
+            setFormData={setFormData}
+            testResult={testResult}
+            testing={testing}
+            loading={loading}
+            onTestConnection={handleTestConnection}
+            onTestNumber={handleTestNumber}
+            onSave={handleSave}
+            onReset={handleReset}
+          />
 
-            <div className="space-y-2">
-              <Label htmlFor="url">URL do Servidor</Label>
-              <Input
-                id="url"
-                type="text"
-                placeholder="https://api.wuzapi.local/v1"
-                value={formData.url}
-                onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-              />
-            </div>
+          <MensagensAutomaticas
+            mensagens={mensagens}
+            setMensagens={setMensagens}
+            onSave={handleSaveMensagens}
+            onRestaurar={handleRestaurarMensagens}
+            loading={loading}
+          />
 
-            <div className="space-y-2">
-              <Label htmlFor="key">Chave de API Global</Label>
-              <Input
-                id="key"
-                type="password"
-                placeholder="••••••••••••••••"
-                value={formData.key}
-                onChange={(e) => setFormData({ ...formData, key: e.target.value })}
-              />
-            </div>
-
-            {testResult && (
-              <Alert variant={testResult.success ? "default" : "destructive"}>
-                {testResult.success ? (
-                  <CheckCircle2 className="h-4 w-4" />
-                ) : (
-                  <XCircle className="h-4 w-4" />
-                )}
-                <AlertDescription>{testResult.message}</AlertDescription>
-              </Alert>
-            )}
-
-            <div className="flex gap-4">
-              <Button onClick={handleSave} disabled={loading}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                💾 Salvar Configuração
-              </Button>
-              <Button variant="outline" onClick={handleTestConnection} disabled={testing}>
-                {testing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                🔍 Testar Conexão
-              </Button>
-              <Button variant="secondary" onClick={handleReset}>
-                🔄 Resetar para Padrão
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          <TesteEnvio
+            apiUrl={formData.url}
+            apiKey={formData.key}
+          />
+        </div>
       </div>
     </div>
   );
