@@ -18,13 +18,16 @@ const Cadastro = () => {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => window.location.href = "/admin/cadastro/fornecedores"}
+          >
             <CardHeader>
               <CardTitle>Fornecedores</CardTitle>
               <CardDescription>Gerencie seus fornecedores</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">Em desenvolvimento...</p>
+              <p className="text-sm text-muted-foreground">Cadastre fornecedores de tecidos, estampas e insumos</p>
             </CardContent>
           </Card>
           

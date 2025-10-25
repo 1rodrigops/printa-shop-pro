@@ -107,6 +107,113 @@ export type Database = {
         }
         Relationships: []
       }
+      fornecedor_historico: {
+        Row: {
+          created_at: string | null
+          data_evento: string | null
+          descricao: string
+          fornecedor_id: string
+          id: string
+          metadata: Json | null
+          tipo_evento: string
+          usuario_id: string | null
+          valor: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          data_evento?: string | null
+          descricao: string
+          fornecedor_id: string
+          id?: string
+          metadata?: Json | null
+          tipo_evento: string
+          usuario_id?: string | null
+          valor?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          data_evento?: string | null
+          descricao?: string
+          fornecedor_id?: string
+          id?: string
+          metadata?: Json | null
+          tipo_evento?: string
+          usuario_id?: string | null
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fornecedor_historico_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fornecedores: {
+        Row: {
+          avaliacao: number | null
+          cadastrado_por: string | null
+          cnpj_cpf: string
+          created_at: string | null
+          email_contato: string
+          forma_pagamento: string
+          fornece_amostras: boolean | null
+          id: string
+          link_catalogo: string | null
+          nome_empresa: string
+          observacoes: string | null
+          prazo_entrega: string | null
+          responsavel: string | null
+          status: string
+          telefone_comercial: string | null
+          tipo_fornecimento: string[]
+          tipo_tecido: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avaliacao?: number | null
+          cadastrado_por?: string | null
+          cnpj_cpf: string
+          created_at?: string | null
+          email_contato: string
+          forma_pagamento?: string
+          fornece_amostras?: boolean | null
+          id?: string
+          link_catalogo?: string | null
+          nome_empresa: string
+          observacoes?: string | null
+          prazo_entrega?: string | null
+          responsavel?: string | null
+          status?: string
+          telefone_comercial?: string | null
+          tipo_fornecimento?: string[]
+          tipo_tecido?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avaliacao?: number | null
+          cadastrado_por?: string | null
+          cnpj_cpf?: string
+          created_at?: string | null
+          email_contato?: string
+          forma_pagamento?: string
+          fornece_amostras?: boolean | null
+          id?: string
+          link_catalogo?: string | null
+          nome_empresa?: string
+          observacoes?: string | null
+          prazo_entrega?: string | null
+          responsavel?: string | null
+          status?: string
+          telefone_comercial?: string | null
+          tipo_fornecimento?: string[]
+          tipo_tecido?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       movimentacoes_estoque: {
         Row: {
           created_at: string | null

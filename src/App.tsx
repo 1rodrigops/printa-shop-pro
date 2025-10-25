@@ -19,6 +19,7 @@ import Vendas from "./pages/Vendas";
 import Financeiro from "./pages/Financeiro";
 import Estoque from "./pages/Estoque";
 import Utilidades from "./pages/Utilidades";
+import Fornecedores from "./pages/Fornecedores";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/admin/cadastro/usuarios" element={<CadastroUsuarios />} />
           <Route path="/admin/cadastro/permissoes" element={<Permissoes />} />
           <Route path="/admin/cadastro/produtos" element={<Produtos />} />
+          <Route path="/admin/cadastro/fornecedores" element={<Fornecedores />} />
           <Route path="/admin/vendas" element={<Vendas />} />
           <Route path="/admin/financeiro" element={<Financeiro />} />
           <Route path="/admin/estoque" element={<Estoque />} />
