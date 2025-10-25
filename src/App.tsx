@@ -16,6 +16,9 @@ import CadastroUsuarios from "./pages/CadastroUsuarios";
 import Permissoes from "./pages/Permissoes";
 import Produtos from "./pages/Produtos";
 import Vendas from "./pages/Vendas";
+import Pedidos from "./pages/Pedidos";
+import VendasDoDia from "./pages/VendasDoDia";
+import HistoricoPedidos from "./pages/HistoricoPedidos";
 import ProducaoInterna from "./pages/ProducaoInterna";
 import Financeiro from "./pages/Financeiro";
 import Estoque from "./pages/Estoque";
@@ -49,6 +52,9 @@ const App = () => (
           <Route path="/admin/cadastro/produtos" element={<Produtos />} />
           <Route path="/admin/cadastro/fornecedores" element={<Fornecedores />} />
           <Route path="/admin/vendas" element={<Vendas />} />
+          <Route path="/admin/vendas/pedidos" element={<Pedidos />} />
+          <Route path="/admin/vendas/diarias" element={<VendasDoDia />} />
+          <Route path="/admin/vendas/historico" element={<HistoricoPedidos />} />
           <Route path="/admin/vendas/producao" element={<ProducaoInterna />} />
           <Route path="/admin/financeiro" element={<Financeiro />} />
           <Route path="/admin/estoque" element={<Estoque />} />

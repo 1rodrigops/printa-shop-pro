@@ -80,7 +80,10 @@ const menuItems: MenuItem[] = [
     path: "/admin/vendas",
     allowedRoles: ["superadmin", "admin"],
     submenu: [
-      { icon: Package, name: "Produção Interna", path: "/admin/vendas/producao", allowedRoles: ["superadmin", "admin"] },
+      { icon: Package, name: "📦 Pedidos", path: "/admin/vendas/pedidos", allowedRoles: ["superadmin", "admin"] },
+      { icon: BarChart3, name: "📊 Vendas do Dia", path: "/admin/vendas/diarias", allowedRoles: ["superadmin", "admin"] },
+      { icon: FileText, name: "🕓 Histórico", path: "/admin/vendas/historico", allowedRoles: ["superadmin", "admin"] },
+      { icon: Shirt, name: "🧵 Produção Interna", path: "/admin/vendas/producao", allowedRoles: ["superadmin", "admin"] },
     ],
   },
   {
