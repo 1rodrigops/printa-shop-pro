@@ -12,6 +12,7 @@ import MyOrder from "./pages/MyOrder";
 import Reports from "./pages/Reports";
 import Cadastro from "./pages/Cadastro";
 import CadastroClientes from "./pages/CadastroClientes";
+import CadastroUsuarios from "./pages/CadastroUsuarios";
 import Vendas from "./pages/Vendas";
 import Financeiro from "./pages/Financeiro";
 import Estoque from "./pages/Estoque";
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/cadastro" element={<Cadastro />} />
           <Route path="/admin/cadastro/clientes" element={<CadastroClientes />} />
+          <Route path="/admin/cadastro/usuarios" element={<CadastroUsuarios />} />
           <Route path="/admin/vendas" element={<Vendas />} />
           <Route path="/admin/financeiro" element={<Financeiro />} />
           <Route path="/admin/estoque" element={<Estoque />} />
