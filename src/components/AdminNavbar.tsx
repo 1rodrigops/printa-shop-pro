@@ -183,72 +183,68 @@ const AdminNavbar = () => {
 
           {/* Desktop Menu */}
           <div className="hidden lg:flex items-center gap-1">
-            <NavigationMenu>
-              <NavigationMenuList>
-                {filteredMenuItems.map((item) => {
-                  const Icon = item.icon;
-                  
-                  if (item.submenu && item.submenu.length > 0) {
-                    const filteredSubmenu = item.submenu.filter(sub => hasAccess(sub.allowedRoles));
-                    
-                    if (filteredSubmenu.length === 0) return null;
-                    
-                    return (
-                      <NavigationMenuItem key={item.path}>
-                        <NavigationMenuTrigger 
-                          className={`h-10 px-4 py-2 text-sm font-medium transition-colors ${
-                            isParentActive(item)
-                              ? "text-primary border-b-2 border-primary"
-                              : "text-[#444] hover:text-black hover:bg-gray-100"
-                          }`}
-                        >
-                          <Icon className="w-4 h-4 mr-2" />
-                          {item.name}
-                        </NavigationMenuTrigger>
-                        <NavigationMenuContent className="bg-white">
-                          <ul className="w-48 p-2">
-                            {filteredSubmenu.map((subItem) => {
-                              const SubIcon = subItem.icon;
-                              return (
-                                <li key={subItem.path}>
-                                  <Link
-                                    to={subItem.path}
-                                    className={`flex items-center px-3 py-2 text-sm rounded-md transition-colors ${
-                                      isActive(subItem.path)
-                                        ? "text-primary bg-gray-100"
-                                        : "text-[#444] hover:text-black hover:bg-gray-100"
-                                    }`}
-                                  >
-                                    <SubIcon className="w-4 h-4 mr-2" />
-                                    {subItem.name}
-                                  </Link>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </NavigationMenuContent>
-                      </NavigationMenuItem>
-                    );
-                  }
-                  
-                  return (
-                    <NavigationMenuItem key={item.path}>
-                      <Link
-                        to={item.path}
-                        className={`flex items-center h-10 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                          isActive(item.path)
-                            ? "text-primary border-b-2 border-primary"
+            {filteredMenuItems.map((item) => {
+              const Icon = item.icon;
+              
+              if (item.submenu && item.submenu.length > 0) {
+                const filteredSubmenu = item.submenu.filter(sub => hasAccess(sub.allowedRoles));
+                
+                if (filteredSubmenu.length === 0) return null;
+                
+                return (
+                  <DropdownMenu key={item.path}>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className={`h-10 px-4 py-2 text-sm font-medium transition-colors ${
+                          isParentActive(item)
+                            ? "text-primary bg-gray-100"
                             : "text-[#444] hover:text-black hover:bg-gray-100"
                         }`}
                       >
                         <Icon className="w-4 h-4 mr-2" />
                         {item.name}
-                      </Link>
-                    </NavigationMenuItem>
-                  );
-                })}
-              </NavigationMenuList>
-            </NavigationMenu>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-48 bg-white z-50">
+                      {filteredSubmenu.map((subItem) => {
+                        const SubIcon = subItem.icon;
+                        return (
+                          <DropdownMenuItem key={subItem.path} asChild>
+                            <Link
+                              to={subItem.path}
+                              className={`flex items-center cursor-pointer ${
+                                isActive(subItem.path)
+                                  ? "text-primary bg-gray-100"
+                                  : ""
+                              }`}
+                            >
+                              <SubIcon className="w-4 h-4 mr-2" />
+                              {subItem.name}
+                            </Link>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                );
+              }
+              
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center h-10 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                    isActive(item.path)
+                      ? "text-primary bg-gray-100"
+                      : "text-[#444] hover:text-black hover:bg-gray-100"
+                  }`}
+                >
+                  <Icon className="w-4 h-4 mr-2" />
+                  {item.name}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Right Side - Notifications & User */}
