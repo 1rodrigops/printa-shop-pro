@@ -53,6 +53,60 @@ export type Database = {
         }
         Relationships: []
       }
+      clientes: {
+        Row: {
+          cadastrado_por: string | null
+          cep: string | null
+          cpf_cnpj: string
+          created_at: string | null
+          email: string
+          endereco_bairro: string | null
+          endereco_cidade: string | null
+          endereco_numero: string | null
+          endereco_rua: string | null
+          endereco_uf: string | null
+          id: string
+          nome_completo: string
+          observacoes: string | null
+          telefone: string
+          updated_at: string | null
+        }
+        Insert: {
+          cadastrado_por?: string | null
+          cep?: string | null
+          cpf_cnpj: string
+          created_at?: string | null
+          email: string
+          endereco_bairro?: string | null
+          endereco_cidade?: string | null
+          endereco_numero?: string | null
+          endereco_rua?: string | null
+          endereco_uf?: string | null
+          id?: string
+          nome_completo: string
+          observacoes?: string | null
+          telefone: string
+          updated_at?: string | null
+        }
+        Update: {
+          cadastrado_por?: string | null
+          cep?: string | null
+          cpf_cnpj?: string
+          created_at?: string | null
+          email?: string
+          endereco_bairro?: string | null
+          endereco_cidade?: string | null
+          endereco_numero?: string | null
+          endereco_rua?: string | null
+          endereco_uf?: string | null
+          id?: string
+          nome_completo?: string
+          observacoes?: string | null
+          telefone?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           created_at: string
