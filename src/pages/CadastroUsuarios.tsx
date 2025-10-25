@@ -7,6 +7,8 @@ import AdminNavbar from "@/components/AdminNavbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/PasswordInput";
+import { PasswordConfirmInput } from "@/components/PasswordConfirmInput";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -52,6 +54,14 @@ import {
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+const passwordRequirements = z.string()
+  .min(9, "Senha deve ter no mínimo 9 caracteres")
+  .regex(/[A-Z]/, "Senha deve conter pelo menos uma letra maiúscula")
+  .regex(/[a-z]/, "Senha deve conter pelo menos uma letra minúscula")
+  .regex(/[0-9]/, "Senha deve conter pelo menos um número")
+  .regex(/[!@#$%^&*(),.?":{}|<>]/, "Senha deve conter pelo menos um símbolo especial")
+  .refine((val) => !/\s/.test(val), "Senha não pode conter espaços");
+
 const usuarioSchema = z.object({
   nome_completo: z.string()
     .trim()
@@ -61,10 +71,7 @@ const usuarioSchema = z.object({
     .trim()
     .email("E-mail inválido")
     .max(255, "E-mail deve ter no máximo 255 caracteres"),
-  senha: z.string()
-    .min(6, "Senha deve ter no mínimo 6 caracteres")
-    .optional()
-    .or(z.literal("")),
+  senha: z.union([passwordRequirements, z.literal("")]),
   confirmar_senha: z.string().optional().or(z.literal("")),
   role: z.enum(["superadmin", "admin", "cliente"]),
   telefone: z.string().trim().max(15).optional(),
@@ -540,37 +547,26 @@ const CadastroUsuarios = () => {
                   )}
                 </div>
 
-                <div>
-                  <Label htmlFor="senha">
-                    Senha {!editingUsuario && <span className="text-destructive">*</span>}
-                  </Label>
-                  <Input
-                    id="senha"
-                    type="password"
-                    {...register("senha")}
-                    placeholder={editingUsuario ? "Deixe em branco para manter" : "Mínimo 6 caracteres"}
+                <div className="md:col-span-2">
+                  <PasswordInput
+                    value={senhaValue || ""}
+                    onChange={(value) => setValue("senha", value)}
+                    label={`Senha ${!editingUsuario ? "*" : ""}`}
+                    placeholder={editingUsuario ? "Deixe em branco para manter a senha atual" : "Digite uma senha segura"}
+                    showStrengthIndicator={true}
+                    error={errors.senha?.message}
                   />
-                  {errors.senha && (
-                    <p className="text-sm text-destructive mt-1">
-                      {errors.senha.message}
-                    </p>
-                  )}
                 </div>
 
-                <div>
-                  <Label htmlFor="confirmar_senha">Confirmar Senha</Label>
-                  <Input
-                    id="confirmar_senha"
-                    type="password"
-                    {...register("confirmar_senha")}
-                    placeholder="Digite a senha novamente"
-                    disabled={!senhaValue}
+                <div className="md:col-span-2">
+                  <PasswordConfirmInput
+                    value={watch("confirmar_senha") || ""}
+                    onChange={(value) => setValue("confirmar_senha", value)}
+                    passwordValue={senhaValue || ""}
+                    label="Confirmar Senha"
+                    placeholder="Digite sua senha novamente"
+                    error={errors.confirmar_senha?.message}
                   />
-                  {errors.confirmar_senha && (
-                    <p className="text-sm text-destructive mt-1">
-                      {errors.confirmar_senha.message}
-                    </p>
-                  )}
                 </div>
 
                 <div>
