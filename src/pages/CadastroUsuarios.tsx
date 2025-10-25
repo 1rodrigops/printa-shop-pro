@@ -144,42 +144,27 @@ const CadastroUsuarios = () => {
   const fetchUsuarios = async () => {
     setLoading(true);
     try {
-      // Buscar todos os usuários com suas roles
-      const { data: rolesData, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("user_id, role");
-
-      if (rolesError) throw rolesError;
-
-      // Buscar dados dos usuários do auth
-      const userIds = rolesData.map((r) => r.user_id);
+      const { data: { session } } = await supabase.auth.getSession();
       
-      // Buscar metadados dos usuários
-      const usersWithRoles: Usuario[] = [];
-      
-      for (const roleData of rolesData) {
-        const { data: userData, error: userError } = await supabase.auth.admin.getUserById(
-          roleData.user_id
-        );
-
-        if (userError) {
-          console.error("Erro ao buscar usuário:", userError);
-          continue;
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-users`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({ action: "list" }),
         }
+      );
 
-        if (userData.user) {
-          usersWithRoles.push({
-            id: userData.user.id,
-            email: userData.user.email || "",
-            role: roleData.role as UserRole,
-            created_at: userData.user.created_at,
-            last_sign_in_at: userData.user.last_sign_in_at,
-            metadata: userData.user.user_metadata,
-          });
-        }
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Erro ao carregar usuários");
       }
 
-      setUsuarios(usersWithRoles);
+      setUsuarios(result.users);
     } catch (error: any) {
       toast({
         title: "Erro ao carregar usuários",
@@ -200,30 +185,38 @@ const CadastroUsuarios = () => {
   // Salvar usuário
   const onSubmit = async (data: UsuarioFormData) => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+
       if (editingUsuario) {
         // Atualizar usuário existente
-        const { error: updateError } = await supabase.auth.admin.updateUserById(
-          editingUsuario.id,
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-users`,
           {
-            email: data.email,
-            user_metadata: {
-              nome_completo: data.nome_completo,
-              telefone: data.telefone || "",
-              status: data.status,
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session?.access_token}`,
             },
-            ...(data.senha && { password: data.senha }),
+            body: JSON.stringify({
+              action: "update",
+              data: {
+                userId: editingUsuario.id,
+                email: data.email,
+                password: data.senha || undefined,
+                nome_completo: data.nome_completo,
+                telefone: data.telefone || "",
+                status: data.status,
+                role: data.role,
+              },
+            }),
           }
         );
 
-        if (updateError) throw updateError;
+        const result = await response.json();
 
-        // Atualizar role
-        const { error: roleError } = await supabase
-          .from("user_roles")
-          .update({ role: data.role })
-          .eq("user_id", editingUsuario.id);
-
-        if (roleError) throw roleError;
+        if (!response.ok) {
+          throw new Error(result.error || "Erro ao atualizar usuário");
+        }
 
         await logActivity(
           "user_edit",
@@ -246,33 +239,38 @@ const CadastroUsuarios = () => {
           return;
         }
 
-        const { data: newUser, error: signUpError } = await supabase.auth.admin.createUser({
-          email: data.email,
-          password: data.senha,
-          email_confirm: true,
-          user_metadata: {
-            nome_completo: data.nome_completo,
-            telefone: data.telefone || "",
-            status: data.status,
-          },
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-users`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session?.access_token}`,
+            },
+            body: JSON.stringify({
+              action: "create",
+              data: {
+                email: data.email,
+                password: data.senha,
+                nome_completo: data.nome_completo,
+                telefone: data.telefone || "",
+                status: data.status,
+                role: data.role,
+              },
+            }),
+          }
+        );
 
-        if (signUpError) throw signUpError;
+        const result = await response.json();
 
-        // Atribuir role
-        const { error: roleError } = await supabase
-          .from("user_roles")
-          .insert({
-            user_id: newUser.user.id,
-            role: data.role,
-          });
-
-        if (roleError) throw roleError;
+        if (!response.ok) {
+          throw new Error(result.error || "Erro ao criar usuário");
+        }
 
         await logActivity(
           "user_create",
           `Criou novo usuário ${data.email} (Função: ${data.role})`,
-          { user_id: newUser.user.id, email: data.email }
+          { user_id: result.user.id, email: data.email }
         );
 
         toast({
@@ -318,11 +316,28 @@ const CadastroUsuarios = () => {
     if (!deletingUsuario) return;
 
     try {
-      const { error: deleteError } = await supabase.auth.admin.deleteUser(
-        deletingUsuario.id
+      const { data: { session } } = await supabase.auth.getSession();
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-users`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({
+            action: "delete",
+            data: { userId: deletingUsuario.id },
+          }),
+        }
       );
 
-      if (deleteError) throw deleteError;
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Erro ao excluir usuário");
+      }
 
       await logActivity(
         "user_delete",
