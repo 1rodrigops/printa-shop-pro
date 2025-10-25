@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Navbar from "@/components/Navbar";
+import AdminNavbar from "@/components/AdminNavbar";
 import { OrderProgressBar } from "@/components/OrderProgressBar";
 import { MessageCircle, RefreshCw, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -79,9 +79,9 @@ const MyOrder = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
+  return (
+    <div className="min-h-screen bg-background">
+      <AdminNavbar />
         <div className="container mx-auto px-4 py-12">
           <p className="text-center text-muted-foreground">Carregando pedidos...</p>
         </div>
@@ -91,7 +91,7 @@ const MyOrder = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <AdminNavbar />
       
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">

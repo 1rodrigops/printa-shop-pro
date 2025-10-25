@@ -10,6 +10,11 @@ import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import MyOrder from "./pages/MyOrder";
 import Reports from "./pages/Reports";
+import Cadastro from "./pages/Cadastro";
+import Vendas from "./pages/Vendas";
+import Financeiro from "./pages/Financeiro";
+import Estoque from "./pages/Estoque";
+import Utilidades from "./pages/Utilidades";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,7 +31,12 @@ const App = () => (
           <Route path="/envio" element={<Shipping />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/cadastro" element={<Cadastro />} />
+          <Route path="/admin/vendas" element={<Vendas />} />
+          <Route path="/admin/financeiro" element={<Financeiro />} />
+          <Route path="/admin/estoque" element={<Estoque />} />
           <Route path="/admin/relatorios" element={<Reports />} />
+          <Route path="/admin/utilidades" element={<Utilidades />} />
           <Route path="/meu-pedido" element={<MyOrder />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

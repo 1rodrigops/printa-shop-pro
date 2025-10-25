@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReportMetricsCard } from "@/components/admin/ReportMetricsCard";
 import { ReportCharts } from "@/components/admin/ReportCharts";
 import { TopAdminsRanking } from "@/components/admin/TopAdminsRanking";
 import { useToast } from "@/hooks/use-toast";
 import { useUserRole } from "@/hooks/useUserRole";
+import AdminNavbar from "@/components/AdminNavbar";
 import {
   Package,
   Scissors,
@@ -189,7 +190,8 @@ const Reports = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
+      <AdminNavbar />
+      <div className="container mx-auto px-4 pt-24 pb-8">
         <div className="flex justify-between items-start mb-8">
           <div className="flex items-center gap-4">
             <Button

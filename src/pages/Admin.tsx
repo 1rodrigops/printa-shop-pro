@@ -7,8 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import Navbar from "@/components/Navbar";
-import { Package, Clock, CheckCircle, XCircle, DollarSign, TrendingUp, Calendar, ShoppingBag, LogOut, BarChart3 } from "lucide-react";
+import AdminNavbar from "@/components/AdminNavbar";
+import { Package, Clock, CheckCircle, XCircle, DollarSign, TrendingUp, Calendar, ShoppingBag, BarChart3 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
 import type { User } from '@supabase/supabase-js';
 import { ActivityLog } from "@/components/admin/ActivityLog";
@@ -38,7 +38,7 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [period, setPeriod] = useState<"7d" | "30d" | "90d" | "all">("30d");
-  const { logLogin, logLogout } = useAdminActivity();
+  const { logLogin } = useAdminActivity();
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -125,19 +125,6 @@ const Admin = () => {
       logLogin();
     }
   }, [user, isAdmin]);
-
-  const handleLogout = async () => {
-    // Log logout before signing out
-    await logLogout();
-    
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error("Erro ao sair");
-    } else {
-      toast.success("Logout realizado com sucesso");
-      navigate("/auth");
-    }
-  };
 
   if (checkingAuth || !user) {
     return (
@@ -232,9 +219,9 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <AdminNavbar />
       
-      <div className="container mx-auto px-4 pt-32 pb-20">
+      <div className="container mx-auto px-4 pt-24 pb-20">
         <div className="mb-12 flex justify-between items-start">
           <div>
             <h1 className="text-5xl font-bold mb-4">
@@ -269,15 +256,6 @@ const Admin = () => {
                 <SelectItem value="all">Todo o período</SelectItem>
               </SelectContent>
             </Select>
-            
-            <Button 
-              variant="outline" 
-              onClick={handleLogout}
-              className="flex items-center gap-2"
-            >
-              <LogOut className="w-4 h-4" />
-              Sair
-            </Button>
           </div>
         </div>
 
