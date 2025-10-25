@@ -303,6 +303,149 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_logs: {
+        Row: {
+          created_at: string | null
+          id: string
+          mensagem_api: string | null
+          metodo_pagamento: string
+          pedido_id: string | null
+          status: string
+          transaction_id: string | null
+          valor: number
+          webhook_data: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          mensagem_api?: string | null
+          metodo_pagamento: string
+          pedido_id?: string | null
+          status: string
+          transaction_id?: string | null
+          valor: number
+          webhook_data?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          mensagem_api?: string | null
+          metodo_pagamento?: string
+          pedido_id?: string | null
+          status?: string
+          transaction_id?: string | null
+          valor?: number
+          webhook_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_logs_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          mensagem_checkout: string | null
+          mercadopago_access_token: string | null
+          mercadopago_enabled: boolean
+          mercadopago_envios: boolean | null
+          mercadopago_mensagem: string | null
+          mercadopago_parcelamento: boolean | null
+          mercadopago_public_key: string | null
+          mercadopago_url_retorno: string | null
+          mercadopago_webhook_url: string | null
+          pagseguro_ambiente: string | null
+          pagseguro_email: string | null
+          pagseguro_enabled: boolean
+          pagseguro_mensagem_retorno: string | null
+          pagseguro_parcelamento: boolean | null
+          pagseguro_taxa: number | null
+          pagseguro_token: string | null
+          pagseguro_webhook_url: string | null
+          pix_api_url: string | null
+          pix_banco: string | null
+          pix_chave: string | null
+          pix_enabled: boolean
+          pix_gerar_qrcode: boolean | null
+          pix_nome_recebedor: string | null
+          pix_webhook_url: string | null
+          prazo_compensacao: string | null
+          updated_at: string | null
+          updated_by: string | null
+          valor_minimo_pedido: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          mensagem_checkout?: string | null
+          mercadopago_access_token?: string | null
+          mercadopago_enabled?: boolean
+          mercadopago_envios?: boolean | null
+          mercadopago_mensagem?: string | null
+          mercadopago_parcelamento?: boolean | null
+          mercadopago_public_key?: string | null
+          mercadopago_url_retorno?: string | null
+          mercadopago_webhook_url?: string | null
+          pagseguro_ambiente?: string | null
+          pagseguro_email?: string | null
+          pagseguro_enabled?: boolean
+          pagseguro_mensagem_retorno?: string | null
+          pagseguro_parcelamento?: boolean | null
+          pagseguro_taxa?: number | null
+          pagseguro_token?: string | null
+          pagseguro_webhook_url?: string | null
+          pix_api_url?: string | null
+          pix_banco?: string | null
+          pix_chave?: string | null
+          pix_enabled?: boolean
+          pix_gerar_qrcode?: boolean | null
+          pix_nome_recebedor?: string | null
+          pix_webhook_url?: string | null
+          prazo_compensacao?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          valor_minimo_pedido?: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          mensagem_checkout?: string | null
+          mercadopago_access_token?: string | null
+          mercadopago_enabled?: boolean
+          mercadopago_envios?: boolean | null
+          mercadopago_mensagem?: string | null
+          mercadopago_parcelamento?: boolean | null
+          mercadopago_public_key?: string | null
+          mercadopago_url_retorno?: string | null
+          mercadopago_webhook_url?: string | null
+          pagseguro_ambiente?: string | null
+          pagseguro_email?: string | null
+          pagseguro_enabled?: boolean
+          pagseguro_mensagem_retorno?: string | null
+          pagseguro_parcelamento?: boolean | null
+          pagseguro_taxa?: number | null
+          pagseguro_token?: string | null
+          pagseguro_webhook_url?: string | null
+          pix_api_url?: string | null
+          pix_banco?: string | null
+          pix_chave?: string | null
+          pix_enabled?: boolean
+          pix_gerar_qrcode?: boolean | null
+          pix_nome_recebedor?: string | null
+          pix_webhook_url?: string | null
+          prazo_compensacao?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          valor_minimo_pedido?: number
+        }
+        Relationships: []
+      }
       permissions_matrix: {
         Row: {
           can_delete: boolean | null

@@ -22,6 +22,7 @@ import HistoricoPedidos from "./pages/HistoricoPedidos";
 import ProducaoInterna from "./pages/ProducaoInterna";
 import QualidadeEntrega from "./pages/QualidadeEntrega";
 import RelatoriosIntegrados from "./pages/RelatoriosIntegrados";
+import FormasDePagamento from "./pages/FormasDePagamento";
 import Financeiro from "./pages/Financeiro";
 import Estoque from "./pages/Estoque";
 import Utilidades from "./pages/Utilidades";
@@ -60,6 +61,7 @@ const App = () => (
           <Route path="/admin/vendas/producao" element={<ProducaoInterna />} />
           <Route path="/admin/vendas/qualidade-entrega" element={<QualidadeEntrega />} />
           <Route path="/admin/vendas/relatorios" element={<RelatoriosIntegrados />} />
+          <Route path="/admin/financeiro/forma-de-pagamento" element={<FormasDePagamento />} />
           <Route path="/admin/financeiro" element={<Financeiro />} />
           <Route path="/admin/estoque" element={<Estoque />} />
           <Route path="/admin/relatorios" element={<Reports />} />

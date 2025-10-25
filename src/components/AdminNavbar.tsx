@@ -94,6 +94,7 @@ const menuItems: MenuItem[] = [
     path: "/admin/financeiro",
     allowedRoles: ["superadmin", "admin"],
     submenu: [
+      { icon: CreditCard, name: "💳 Formas de Pagamento", path: "/admin/financeiro/forma-de-pagamento", allowedRoles: ["superadmin", "admin"] },
       { icon: CreditCard, name: "Contas a Pagar", path: "/admin/financeiro/pagar", allowedRoles: ["superadmin", "admin"] },
       { icon: DollarSign, name: "Contas a Receber", path: "/admin/financeiro/receber", allowedRoles: ["superadmin", "admin"] },
       { icon: DollarSign, name: "Caixa Diário", path: "/admin/financeiro/caixa", allowedRoles: ["superadmin", "admin"] },
