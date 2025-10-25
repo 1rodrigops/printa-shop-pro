@@ -79,6 +79,9 @@ const menuItems: MenuItem[] = [
     name: "🧾 Vendas",
     path: "/admin/vendas",
     allowedRoles: ["superadmin", "admin"],
+    submenu: [
+      { icon: Package, name: "Produção Interna", path: "/admin/vendas/producao", allowedRoles: ["superadmin", "admin"] },
+    ],
   },
   {
     icon: CreditCard,

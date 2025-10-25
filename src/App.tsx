@@ -16,6 +16,7 @@ import CadastroUsuarios from "./pages/CadastroUsuarios";
 import Permissoes from "./pages/Permissoes";
 import Produtos from "./pages/Produtos";
 import Vendas from "./pages/Vendas";
+import ProducaoInterna from "./pages/ProducaoInterna";
 import Financeiro from "./pages/Financeiro";
 import Estoque from "./pages/Estoque";
 import Utilidades from "./pages/Utilidades";
@@ -48,6 +49,7 @@ const App = () => (
           <Route path="/admin/cadastro/produtos" element={<Produtos />} />
           <Route path="/admin/cadastro/fornecedores" element={<Fornecedores />} />
           <Route path="/admin/vendas" element={<Vendas />} />
+          <Route path="/admin/vendas/producao" element={<ProducaoInterna />} />
           <Route path="/admin/financeiro" element={<Financeiro />} />
           <Route path="/admin/estoque" element={<Estoque />} />
           <Route path="/admin/relatorios" element={<Reports />} />

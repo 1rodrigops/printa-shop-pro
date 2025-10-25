@@ -258,6 +258,7 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone: string
+          etapa_producao: string | null
           id: string
           image_url: string | null
           notes: string | null
@@ -273,6 +274,7 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone: string
+          etapa_producao?: string | null
           id?: string
           image_url?: string | null
           notes?: string | null
@@ -288,6 +290,7 @@ export type Database = {
           customer_email?: string
           customer_name?: string
           customer_phone?: string
+          etapa_producao?: string | null
           id?: string
           image_url?: string | null
           notes?: string | null
@@ -335,6 +338,53 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      production_log: {
+        Row: {
+          created_at: string | null
+          data_hora: string | null
+          etapa: string
+          id: string
+          mensagem_enviada: boolean | null
+          observacao: string | null
+          operador: string | null
+          operador_id: string | null
+          pedido_id: string
+          tempo_etapa_minutos: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          data_hora?: string | null
+          etapa: string
+          id?: string
+          mensagem_enviada?: boolean | null
+          observacao?: string | null
+          operador?: string | null
+          operador_id?: string | null
+          pedido_id: string
+          tempo_etapa_minutos?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          data_hora?: string | null
+          etapa?: string
+          id?: string
+          mensagem_enviada?: boolean | null
+          observacao?: string | null
+          operador?: string | null
+          operador_id?: string | null
+          pedido_id?: string
+          tempo_etapa_minutos?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_log_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       produto_variacoes: {
         Row: {
@@ -587,6 +637,7 @@ export type Database = {
         Args: { data_fim: string; data_inicio: string }
         Returns: Json
       }
+      calcular_tempo_medio_etapa: { Args: { p_etapa: string }; Returns: number }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -606,6 +657,10 @@ export type Database = {
           p_metadata?: Json
           p_result?: string
         }
+        Returns: string
+      }
+      registrar_mudanca_etapa: {
+        Args: { p_etapa: string; p_observacao?: string; p_pedido_id: string }
         Returns: string
       }
     }
