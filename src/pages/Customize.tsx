@@ -41,6 +41,12 @@ const Customize = () => {
     customerName: "",
     customerEmail: "",
     customerPhone: "",
+    endereco_rua: "",
+    endereco_numero: "",
+    endereco_bairro: "",
+    endereco_cidade: "",
+    endereco_uf: "",
+    cep: "",
   });
 
   const colors = [
@@ -168,9 +174,17 @@ const Customize = () => {
 • Tecido: ${fabric?.name}
 • Tamanhos: ${sizesText} (Total: ${totalQty} ${totalQty === 1 ? "unidade" : "unidades"})
 • Cor: ${selectedColor?.name || "Branco"}
+
+📋 *Dados do Cliente:*
 • Nome: ${formData.customerName}
 • Email: ${formData.customerEmail}
 • Telefone: ${formData.customerPhone}
+
+📍 *Endereço de Entrega:*
+• CEP: ${formData.cep}
+• Rua: ${formData.endereco_rua}, ${formData.endereco_numero}
+• Bairro: ${formData.endereco_bairro}
+• Cidade: ${formData.endereco_cidade} - ${formData.endereco_uf}
 
 💰 Valor total: R$ ${calculateTotal().toFixed(2)}
 
@@ -477,6 +491,67 @@ Aguardo o link de pagamento e aprovação do layout!`;
                       onChange={(e) => setFormData({...formData, customerPhone: e.target.value})}
                       required
                     />
+                  </div>
+                  <div>
+                    <Label htmlFor="cep">CEP *</Label>
+                    <Input
+                      id="cep"
+                      placeholder="00000-000"
+                      value={formData.cep}
+                      onChange={(e) => setFormData({...formData, cep: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="md:col-span-2">
+                      <Label htmlFor="endereco_rua">Rua *</Label>
+                      <Input
+                        id="endereco_rua"
+                        value={formData.endereco_rua}
+                        onChange={(e) => setFormData({...formData, endereco_rua: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="endereco_numero">Número *</Label>
+                      <Input
+                        id="endereco_numero"
+                        value={formData.endereco_numero}
+                        onChange={(e) => setFormData({...formData, endereco_numero: e.target.value})}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="endereco_bairro">Bairro *</Label>
+                    <Input
+                      id="endereco_bairro"
+                      value={formData.endereco_bairro}
+                      onChange={(e) => setFormData({...formData, endereco_bairro: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="md:col-span-2">
+                      <Label htmlFor="endereco_cidade">Cidade *</Label>
+                      <Input
+                        id="endereco_cidade"
+                        value={formData.endereco_cidade}
+                        onChange={(e) => setFormData({...formData, endereco_cidade: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="endereco_uf">UF *</Label>
+                      <Input
+                        id="endereco_uf"
+                        placeholder="PR"
+                        maxLength={2}
+                        value={formData.endereco_uf}
+                        onChange={(e) => setFormData({...formData, endereco_uf: e.target.value.toUpperCase()})}
+                        required
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
