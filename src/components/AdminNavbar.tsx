@@ -85,6 +85,7 @@ const menuItems: MenuItem[] = [
       { icon: FileText, name: "🕓 Histórico", path: "/admin/vendas/historico", allowedRoles: ["superadmin", "admin"] },
       { icon: Shirt, name: "🧵 Produção Interna", path: "/admin/vendas/producao", allowedRoles: ["superadmin", "admin"] },
       { icon: Shield, name: "🔍 Qualidade e Entrega", path: "/admin/vendas/qualidade-entrega", allowedRoles: ["superadmin", "admin"] },
+      { icon: BarChart3, name: "📊 Relatórios Integrados", path: "/admin/vendas/relatorios", allowedRoles: ["superadmin", "admin"] },
     ],
   },
   {
