@@ -71,6 +71,7 @@ const menuItems: MenuItem[] = [
       { icon: Truck, name: "Fornecedores", path: "/admin/cadastro/fornecedores", allowedRoles: ["superadmin"] },
       { icon: UserCog, name: "Usuários", path: "/admin/cadastro/usuarios", allowedRoles: ["superadmin"] },
       { icon: Shield, name: "Permissões", path: "/admin/cadastro/permissoes", allowedRoles: ["superadmin"] },
+      { icon: Shirt, name: "Produtos", path: "/admin/cadastro/produtos", allowedRoles: ["superadmin", "admin"] },
     ],
   },
   {

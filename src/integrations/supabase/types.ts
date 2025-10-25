@@ -107,6 +107,44 @@ export type Database = {
         }
         Relationships: []
       }
+      movimentacoes_estoque: {
+        Row: {
+          created_at: string | null
+          id: string
+          observacao: string | null
+          quantidade: number
+          tipo: string
+          usuario_id: string | null
+          variacao_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          observacao?: string | null
+          quantidade: number
+          tipo: string
+          usuario_id?: string | null
+          variacao_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          observacao?: string | null
+          quantidade?: number
+          tipo?: string
+          usuario_id?: string | null
+          variacao_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movimentacoes_estoque_variacao_id_fkey"
+            columns: ["variacao_id"]
+            isOneToOne: false
+            referencedRelation: "produto_variacoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           created_at: string
@@ -187,6 +225,116 @@ export type Database = {
           id?: string
           module?: string
           role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      produto_variacoes: {
+        Row: {
+          cor: string
+          created_at: string | null
+          estoque: number
+          id: string
+          produto_id: string
+          tamanho: string
+          tecido: string
+          updated_at: string | null
+        }
+        Insert: {
+          cor: string
+          created_at?: string | null
+          estoque?: number
+          id?: string
+          produto_id: string
+          tamanho: string
+          tecido: string
+          updated_at?: string | null
+        }
+        Update: {
+          cor?: string
+          created_at?: string | null
+          estoque?: number
+          id?: string
+          produto_id?: string
+          tamanho?: string
+          tecido?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "produto_variacoes_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      produtos: {
+        Row: {
+          cadastrado_por: string | null
+          categoria: string
+          cores_disponiveis: string[]
+          created_at: string | null
+          descricao_completa: string | null
+          descricao_curta: string | null
+          estampa_url: string | null
+          fornecedor_id: string | null
+          id: string
+          nome: string
+          preco_frente: number
+          preco_frente_verso: number
+          promo_validade: string | null
+          promo_valor: number | null
+          sku: string | null
+          status: string
+          tamanhos_disponiveis: string[]
+          tecidos: string[]
+          tipo: string
+          updated_at: string | null
+        }
+        Insert: {
+          cadastrado_por?: string | null
+          categoria: string
+          cores_disponiveis?: string[]
+          created_at?: string | null
+          descricao_completa?: string | null
+          descricao_curta?: string | null
+          estampa_url?: string | null
+          fornecedor_id?: string | null
+          id?: string
+          nome: string
+          preco_frente: number
+          preco_frente_verso: number
+          promo_validade?: string | null
+          promo_valor?: number | null
+          sku?: string | null
+          status?: string
+          tamanhos_disponiveis?: string[]
+          tecidos?: string[]
+          tipo: string
+          updated_at?: string | null
+        }
+        Update: {
+          cadastrado_por?: string | null
+          categoria?: string
+          cores_disponiveis?: string[]
+          created_at?: string | null
+          descricao_completa?: string | null
+          descricao_curta?: string | null
+          estampa_url?: string | null
+          fornecedor_id?: string | null
+          id?: string
+          nome?: string
+          preco_frente?: number
+          preco_frente_verso?: number
+          promo_validade?: string | null
+          promo_valor?: number | null
+          sku?: string | null
+          status?: string
+          tamanhos_disponiveis?: string[]
+          tecidos?: string[]
+          tipo?: string
           updated_at?: string | null
         }
         Relationships: []
