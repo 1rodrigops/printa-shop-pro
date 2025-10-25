@@ -536,6 +536,48 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_message_logs: {
+        Row: {
+          created_at: string | null
+          enviado_por: string | null
+          evento: string
+          id: string
+          numero: string
+          payload: Json | null
+          pedido_id: string | null
+          resposta_api: string | null
+          status_http: string | null
+          tempo_envio_ms: number | null
+          tipo_envio: string
+        }
+        Insert: {
+          created_at?: string | null
+          enviado_por?: string | null
+          evento: string
+          id?: string
+          numero: string
+          payload?: Json | null
+          pedido_id?: string | null
+          resposta_api?: string | null
+          status_http?: string | null
+          tempo_envio_ms?: number | null
+          tipo_envio: string
+        }
+        Update: {
+          created_at?: string | null
+          enviado_por?: string | null
+          evento?: string
+          id?: string
+          numero?: string
+          payload?: Json | null
+          pedido_id?: string | null
+          resposta_api?: string | null
+          status_http?: string | null
+          tempo_envio_ms?: number | null
+          tipo_envio?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

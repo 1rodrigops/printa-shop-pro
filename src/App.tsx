@@ -24,6 +24,7 @@ import ApiWhatsApp from "./pages/ApiWhatsApp";
 import ConfiguracoesGerais from "./pages/ConfiguracoesGerais";
 import BackupSistema from "./pages/BackupSistema";
 import LogsSistema from "./pages/LogsSistema";
+import LogsWhatsApp from "./pages/LogsWhatsApp";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,6 +56,7 @@ const App = () => (
           <Route path="/admin/utilidades/backup" element={<BackupSistema />} />
           <Route path="/admin/utilidades/logs" element={<LogsSistema />} />
           <Route path="/admin/utilidades/api-whatsapp" element={<ApiWhatsApp />} />
+          <Route path="/admin/utilidades/logs-whatsapp" element={<LogsWhatsApp />} />
           <Route path="/meu-pedido" element={<MyOrder />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

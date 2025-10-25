@@ -72,6 +72,21 @@ const Utilidades = () => {
               </CardContent>
             </Card>
           </Link>
+
+          <Link to="/admin/utilidades/logs-whatsapp">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-primary" />
+                  Logs de Mensagens
+                </CardTitle>
+                <CardDescription>Histórico WhatsApp</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Visualize todos os envios automáticos e manuais</p>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
       </div>
     </div>

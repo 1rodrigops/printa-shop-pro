@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { ConfiguracaoAPI } from "@/components/whatsapp/ConfiguracaoAPI";
 import { MensagensAutomaticas } from "@/components/whatsapp/MensagensAutomaticas";
+import { QRCodeConexao } from "@/components/whatsapp/QRCodeConexao";
 import { TesteEnvio } from "@/components/whatsapp/TesteEnvio";
 
 const mensagensPadrao = {
@@ -350,6 +351,13 @@ const ApiWhatsApp = () => {
             onSave={handleSaveMensagens}
             onRestaurar={handleRestaurarMensagens}
             loading={loading}
+          />
+
+          <QRCodeConexao
+            apiUrl={formData.url}
+            apiKey={formData.key}
+            numeroWhatsApp={formData.numeroWhatsApp}
+            provider={formData.provider}
           />
 
           <TesteEnvio

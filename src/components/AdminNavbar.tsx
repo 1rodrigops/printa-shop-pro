@@ -118,6 +118,7 @@ const menuItems: MenuItem[] = [
       { icon: Package, name: "Backup", path: "/admin/utilidades/backup", allowedRoles: ["superadmin"] },
       { icon: FileText, name: "Logs do Sistema", path: "/admin/utilidades/logs", allowedRoles: ["superadmin"] },
       { icon: Bell, name: "API WhatsApp", path: "/admin/utilidades/api-whatsapp", allowedRoles: ["superadmin"] },
+      { icon: FileText, name: "Logs de Mensagens", path: "/admin/utilidades/logs-whatsapp", allowedRoles: ["superadmin", "admin"] },
     ],
   },
   {
