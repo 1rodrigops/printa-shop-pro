@@ -1,5 +1,4 @@
 import AdminNavbar from "@/components/AdminNavbar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Loader2, Settings } from "lucide-react";
@@ -11,6 +10,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { IdentidadeVisual } from "@/components/configuracoes/IdentidadeVisual";
+import { Localizacao } from "@/components/configuracoes/Localizacao";
+import { ParametrosProducao } from "@/components/configuracoes/ParametrosProducao";
 
 const ConfiguracoesGerais = () => {
   const { role, loading: roleLoading } = useUserRole();
@@ -60,49 +62,13 @@ const ConfiguracoesGerais = () => {
 
         <div className="flex items-center gap-3 mb-6">
           <Settings className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">Configurações Gerais</h1>
+          <h1 className="text-3xl font-bold">⚙️ Configurações Gerais</h1>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>🎨 Identidade Visual</CardTitle>
-              <CardDescription>Logotipo, tema de cores, tipografia</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Em desenvolvimento...</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>🌍 Localização</CardTitle>
-              <CardDescription>Moeda, país, idioma</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Em desenvolvimento...</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>🔐 Permissões de Acesso</CardTitle>
-              <CardDescription>Gestão de funções e acessos</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Em desenvolvimento...</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>⚙️ Parâmetros de Produção</CardTitle>
-              <CardDescription>Tempo de pedido, status padrão</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Em desenvolvimento...</p>
-            </CardContent>
-          </Card>
+        <div className="space-y-6">
+          <IdentidadeVisual />
+          <Localizacao />
+          <ParametrosProducao />
         </div>
       </div>
     </div>
