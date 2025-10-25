@@ -69,12 +69,14 @@ serve(async (req) => {
 
         if (createError) throw createError;
 
-        // Atribuir role
+        // Atribuir role (usando upsert para evitar conflitos)
         const { error: roleInsertError } = await supabaseAdmin
           .from("user_roles")
-          .insert({
+          .upsert({
             user_id: newUser.user.id,
             role,
+          }, {
+            onConflict: 'user_id,role'
           });
 
         if (roleInsertError) throw roleInsertError;
@@ -109,11 +111,15 @@ serve(async (req) => {
 
         if (updateError) throw updateError;
 
-        // Atualizar role
+        // Atualizar role (usando upsert para garantir que existe)
         const { error: roleUpdateError } = await supabaseAdmin
           .from("user_roles")
-          .update({ role })
-          .eq("user_id", userId);
+          .upsert({
+            user_id: userId,
+            role,
+          }, {
+            onConflict: 'user_id,role'
+          });
 
         if (roleUpdateError) throw roleUpdateError;
 
