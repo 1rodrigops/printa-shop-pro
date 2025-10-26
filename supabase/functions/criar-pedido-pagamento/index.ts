@@ -125,6 +125,23 @@ serve(async (req) => {
 
     console.log('Pedido criado:', pedido);
 
+    // Enviar confirmação via WhatsApp automaticamente
+    try {
+      const mensagemWhatsApp = `🛍️ Olá ${cliente.nome}! Recebemos seu pedido no site.\n\nPedido nº ${pedido.id.split('-')[0]}\nValor: R$ ${pagamento.valor_total.toFixed(2)}\n\nAcompanhe o status pelo nosso WhatsApp.\nAssim que for atualizado, avisaremos por aqui. 💬`;
+      
+      await supabaseAdmin.functions.invoke('send-whatsapp', {
+        body: {
+          phoneNumber: cliente.telefone.replace(/\D/g, ''),
+          message: mensagemWhatsApp
+        }
+      });
+      
+      console.log('Mensagem WhatsApp enviada com sucesso');
+    } catch (whatsappError) {
+      console.error('Erro ao enviar WhatsApp:', whatsappError);
+      // Não bloqueia o pedido se WhatsApp falhar
+    }
+
     // Processar pagamento baseado no método
     let pagamentoUrl = '';
     let qrCodeData = null;
