@@ -2,3 +2,6 @@ project_id = "bskoovdkgsawzkttnuxu"
 
 [functions.send-whatsapp]
 verify_jwt = true
+
+[functions.criar-pedido-pagamento]
+verify_jwt = false

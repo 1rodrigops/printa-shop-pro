@@ -5,9 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Check, MessageCircle, Shirt, Sparkles, Package, Image as ImageIcon, Plus, Minus } from "lucide-react";
+import { Upload, Check, MessageCircle, Shirt, Sparkles, Package, Image as ImageIcon, Plus, Minus, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
+import { ModalPagamento } from "@/components/pagamento/ModalPagamento";
+import { supabase } from "@/integrations/supabase/client";
 
 type PrintType = "front" | "both";
 type FabricType = "cotton" | "dryfit" | "premium";
@@ -48,6 +50,11 @@ const Customize = () => {
     endereco_uf: "",
     cep: "",
   });
+
+  const [metodoPagamento, setMetodoPagamento] = useState<'pix' | 'pagseguro' | 'mercadopago'>('pix');
+  const [modalPagamentoOpen, setModalPagamentoOpen] = useState(false);
+  const [dadosPagamento, setDadosPagamento] = useState<any>(null);
+  const [processando, setProcessando] = useState(false);
 
   const colors = [
     { name: "Branco", hex: "#FFFFFF", border: true },
@@ -139,7 +146,7 @@ const Customize = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!frontImage) {
@@ -158,45 +165,93 @@ const Customize = () => {
       return;
     }
 
-    // Montar mensagem WhatsApp
-    const fabric = fabricOptions.find(f => f.id === fabricType);
-    const selectedColor = colors.find(c => c.hex === previewColor);
-    
-    // Montar lista de tamanhos
-    const sizesText = sizes
-      .filter(size => sizeQuantities[size] > 0)
-      .map(size => `${sizeQuantities[size]} ${size}`)
-      .join(", ");
-    
-    const message = `Olá! Gostaria de formalizar meu pedido de camisetas personalizadas.
+    // Validar dados do cliente
+    if (!formData.customerName || !formData.customerEmail || !formData.customerPhone) {
+      toast.error("Por favor, preencha todos os dados de contato!");
+      return;
+    }
 
-• Tipo de estampa: ${printType === "front" ? "Somente Frente" : "Frente e Verso"}
-• Tecido: ${fabric?.name}
-• Tamanhos: ${sizesText} (Total: ${totalQty} ${totalQty === 1 ? "unidade" : "unidades"})
-• Cor: ${selectedColor?.name || "Branco"}
+    if (!formData.cep || !formData.endereco_rua || !formData.endereco_cidade || !formData.endereco_uf) {
+      toast.error("Por favor, preencha o endereço completo!");
+      return;
+    }
 
-📋 *Dados do Cliente:*
-• Nome: ${formData.customerName}
-• Email: ${formData.customerEmail}
-• Telefone: ${formData.customerPhone}
+    setProcessando(true);
 
-📍 *Endereço de Entrega:*
-• CEP: ${formData.cep}
-• Rua: ${formData.endereco_rua}, ${formData.endereco_numero}
-• Bairro: ${formData.endereco_bairro}
-• Cidade: ${formData.endereco_cidade} - ${formData.endereco_uf}
+    try {
+      const fabric = fabricOptions.find(f => f.id === fabricType);
+      const selectedColor = colors.find(c => c.hex === previewColor);
 
-💰 Valor total: R$ ${calculateTotal().toFixed(2)}
+      // Preparar dados do pedido
+      const pedidoData = {
+        cliente: {
+          nome: formData.customerName,
+          email: formData.customerEmail,
+          telefone: formData.customerPhone,
+          endereco_rua: formData.endereco_rua,
+          endereco_numero: formData.endereco_numero,
+          endereco_bairro: formData.endereco_bairro,
+          endereco_cidade: formData.endereco_cidade,
+          endereco_uf: formData.endereco_uf,
+          cep: formData.cep
+        },
+        produtos: {
+          tipo_estampa: printType === "front" ? "Somente Frente" : "Frente e Verso",
+          tecido: fabric?.name || "Algodão Tradicional",
+          tamanhos: sizeQuantities,
+          cor: selectedColor?.name || "Branco",
+          total_pecas: totalQty
+        },
+        pagamento: {
+          metodo: metodoPagamento,
+          valor_total: calculateTotal()
+        },
+        imagens: {
+          frente: frontPreview,
+          verso: backPreview || undefined
+        }
+      };
 
-Aguardo o link de pagamento e aprovação do layout!`;
+      console.log('Enviando pedido:', pedidoData);
 
-    const whatsappNumber = "5541999999999"; // Substitua pelo número real
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-    
-    window.open(whatsappUrl, "_blank");
-    toast.success("Redirecionando para WhatsApp!", {
-      description: "Complete seu pedido via WhatsApp"
-    });
+      // Chamar edge function para criar pedido e processar pagamento
+      const { data, error } = await supabase.functions.invoke('criar-pedido-pagamento', {
+        body: pedidoData
+      });
+
+      if (error) {
+        console.error('Erro ao criar pedido:', error);
+        throw new Error(error.message || 'Erro ao processar pedido');
+      }
+
+      console.log('Resposta do servidor:', data);
+
+      if (!data.success) {
+        throw new Error(data.error || 'Erro ao processar pedido');
+      }
+
+      // Armazenar dados para o modal
+      setDadosPagamento({
+        pedidoId: data.pedido_id,
+        pagamentoUrl: data.pagamento_url,
+        qrCodeData: data.qr_code_data
+      });
+
+      // Abrir modal de pagamento
+      setModalPagamentoOpen(true);
+
+      toast.success("Pedido criado com sucesso!", {
+        description: "Complete o pagamento para confirmar"
+      });
+
+    } catch (error) {
+      console.error('Erro ao processar pedido:', error);
+      toast.error("Erro ao processar pedido", {
+        description: error instanceof Error ? error.message : "Tente novamente"
+      });
+    } finally {
+      setProcessando(false);
+    }
   };
 
   return (
@@ -556,18 +611,72 @@ Aguardo o link de pagamento e aprovação do layout!`;
                 </CardContent>
               </Card>
 
+              {/* Forma de Pagamento */}
+              <Card className="border-2 border-primary/20">
+                <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="w-5 h-5" />
+                    Forma de Pagamento
+                  </CardTitle>
+                  <CardDescription>Escolha como deseja pagar seu pedido</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <RadioGroup value={metodoPagamento} onValueChange={(v) => setMetodoPagamento(v as 'pix' | 'pagseguro' | 'mercadopago')}>
+                    <div className="space-y-3">
+                      <label className={`relative flex items-center space-x-3 border-2 rounded-lg p-4 cursor-pointer transition-all hover:scale-105 ${
+                        metodoPagamento === 'pix' ? "border-primary bg-primary/10" : "border-border"
+                      }`}>
+                        <RadioGroupItem value="pix" id="pix" />
+                        <div className="flex-1">
+                          <div className="font-semibold text-lg">💠 PIX</div>
+                          <div className="text-sm text-muted-foreground">Pagamento instantâneo via chave PIX</div>
+                        </div>
+                        <Badge variant="secondary">Mais rápido</Badge>
+                      </label>
+                      
+                      <label className={`relative flex items-center space-x-3 border-2 rounded-lg p-4 cursor-pointer transition-all hover:scale-105 ${
+                        metodoPagamento === 'pagseguro' ? "border-primary bg-primary/10" : "border-border"
+                      }`}>
+                        <RadioGroupItem value="pagseguro" id="pagseguro" />
+                        <div className="flex-1">
+                          <div className="font-semibold text-lg">💳 Cartão - PagSeguro</div>
+                          <div className="text-sm text-muted-foreground">Crédito ou débito em até 12x</div>
+                        </div>
+                      </label>
+                      
+                      <label className={`relative flex items-center space-x-3 border-2 rounded-lg p-4 cursor-pointer transition-all hover:scale-105 ${
+                        metodoPagamento === 'mercadopago' ? "border-primary bg-primary/10" : "border-border"
+                      }`}>
+                        <RadioGroupItem value="mercadopago" id="mercadopago" />
+                        <div className="flex-1">
+                          <div className="font-semibold text-lg">🛍️ Mercado Pago</div>
+                          <div className="text-sm text-muted-foreground">Cartão, boleto ou saldo Mercado Pago</div>
+                        </div>
+                      </label>
+                    </div>
+                  </RadioGroup>
+                </CardContent>
+              </Card>
+
               {/* Botão de Envio */}
               <Button 
                 type="submit" 
                 size="lg" 
                 className="w-full text-lg py-6"
+                disabled={processando}
               >
-                <MessageCircle className="w-5 h-5 mr-2" />
-                🛒 PERSONALIZAR E ENVIAR PEDIDO
+                {processando ? (
+                  <>Processando...</>
+                ) : (
+                  <>
+                    <CreditCard className="w-5 h-5 mr-2" />
+                    💳 FINALIZAR PEDIDO
+                  </>
+                )}
               </Button>
 
               <p className="text-center text-sm text-muted-foreground">
-                ⚠️ O pedido será confirmado pelo WhatsApp com envio do modelo final e link de pagamento seguro.
+                🔒 Pagamento 100% seguro • Seus dados estão protegidos
               </p>
             </form>
           </div>
@@ -679,6 +788,18 @@ Aguardo o link de pagamento e aprovação do layout!`;
           </Card>
         </div>
       </div>
+
+      {/* Modal de Pagamento */}
+      {dadosPagamento && (
+        <ModalPagamento
+          open={modalPagamentoOpen}
+          onClose={() => setModalPagamentoOpen(false)}
+          metodo={metodoPagamento}
+          pagamentoUrl={dadosPagamento.pagamentoUrl}
+          qrCodeData={dadosPagamento.qrCodeData}
+          pedidoId={dadosPagamento.pedidoId}
+        />
+      )}
     </div>
   );
 };
