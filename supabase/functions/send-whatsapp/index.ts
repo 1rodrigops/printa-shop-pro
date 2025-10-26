@@ -1,9 +1,28 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const whatsappSchema = z.object({
+  phone: z.string()
+    .regex(/^\d{10,15}$/, 'Número de telefone inválido')
+    .refine(val => val.length >= 10 && val.length <= 15, 'Telefone deve ter entre 10 e 15 dígitos'),
+  customerName: z.string()
+    .trim()
+    .min(2, 'Nome muito curto')
+    .max(100, 'Nome muito longo')
+    .regex(/^[a-zA-ZÀ-ÿ\s]+$/, 'Nome contém caracteres inválidos'),
+  orderDetails: z.object({
+    quantity: z.number().int().min(1).max(1000),
+    shirtColor: z.string().max(50),
+    shirtSize: z.string().max(10),
+    totalPrice: z.number().min(0).max(1000000)
+  })
+});
 
 interface WhatsAppRequest {
   phone: string;
@@ -22,7 +41,27 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { phone, customerName, orderDetails }: WhatsAppRequest = await req.json();
+    const requestData = await req.json();
+    
+    // Validate input
+    let validatedData: WhatsAppRequest;
+    try {
+      validatedData = whatsappSchema.parse(requestData);
+    } catch (error) {
+      console.error('Validation error:', error);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Dados inválidos', 
+          details: error instanceof z.ZodError ? error.errors : 'Formato de dados incorreto'
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        }
+      );
+    }
+
+    const { phone, customerName, orderDetails } = validatedData;
     
     const wuzapiToken = Deno.env.get('WUZAPI_TOKEN');
     const wuzapiUrl = Deno.env.get('WUZAPI_URL');
