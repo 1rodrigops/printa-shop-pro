@@ -326,42 +326,85 @@ const Customize = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6">
-                <div className="flex items-center justify-center mb-4">
-               <div 
-              className="relative w-64 h-64 rounded-lg shadow-lg flex items-center justify-center overflow-hidden"
-              >
-               {/* imagem da camiseta base */}
-      <img
-        src={`/camisetas/${previewColor}.png`}
-        alt={`Camiseta ${previewColor}`}
-        className="absolute inset-0 w-full h-full object-cover"
-      />
+                  <RadioGroup value={fabricType} onValueChange={(v) => setFabricType(v as FabricType)}>
+                    <div className="space-y-3">
+                      {fabricOptions.map((fabric) => (
+                        <label 
+                          key={fabric.id}
+                          className={`relative flex items-center space-x-3 border-2 rounded-lg p-4 cursor-pointer transition-all hover:scale-105 ${
+                            fabricType === fabric.id ? "border-primary bg-primary/10" : "border-border"
+                          }`}
+                        >
+                          <RadioGroupItem value={fabric.id} id={fabric.id} />
+                          <div className="flex-1">
+                            <div className="font-semibold">{fabric.name}</div>
+                            <div className="text-sm text-muted-foreground">{fabric.description}</div>
+                          </div>
+                          {fabric.price > 0 && (
+                            <Badge variant="secondary">+ R$ {fabric.price},00</Badge>
+                          )}
+                        </label>
+                      ))}
+                    </div>
+                  </RadioGroup>
+                </CardContent>
+              </Card>
 
-      {/* imagem da arte enviada pelo cliente */}
-      <img 
-        src={frontPreview} 
-        alt="Arte na camiseta" 
-        className="relative z-10 max-w-[60%] max-h-[60%] object-contain mix-blend-multiply"
-      />
-    </div>
-  </div>
+              {/* Upload das Artes */}
+              <Card className="border-2 border-primary/20">
+                <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
+                  <CardTitle className="flex items-center gap-2">
+                    <Upload className="w-5 h-5" />
+                    Envie sua logo ou imagem para estampar
+                  </CardTitle>
+                  <CardDescription>JPG ou PNG até 10MB</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                  <div>
+                    <Label htmlFor="front-image" className="text-base font-semibold mb-2 block">
+                      Arte da Frente *
+                    </Label>
+                    <Input
+                      id="front-image"
+                      type="file"
+                      accept="image/png,image/jpeg"
+                      onChange={(e) => handleImageChange(e, "front")}
+                      className="cursor-pointer"
+                    />
+                    {frontPreview && (
+                      <div className="mt-3 relative w-32 h-32 border-2 border-primary/20 rounded-lg overflow-hidden">
+                        <img src={frontPreview} alt="Preview Frente" className="w-full h-full object-contain" />
+                      </div>
+                    )}
+                  </div>
 
-  <div className="flex justify-center gap-3">
-    {colors.map((color) => (
-      <button
-        key={color.hex}
-        type="button"
-        onClick={() => setPreviewColor(color.hex)}
-        className={`w-12 h-12 rounded-full transition-all hover:scale-110 ${
-          previewColor === color.hex ? "ring-4 ring-primary" : ""
-        } ${color.border ? "border-2 border-border" : ""}`}
-        style={{ backgroundColor: color.hex }}
-        title={color.name}
-      />
-    ))}
-  </div>
-</CardContent>
+                  {printType === "both" && (
+                    <div>
+                      <Label htmlFor="back-image" className="text-base font-semibold mb-2 block">
+                        Arte do Verso *
+                      </Label>
+                      <Input
+                        id="back-image"
+                        type="file"
+                        accept="image/png,image/jpeg"
+                        onChange={(e) => handleImageChange(e, "back")}
+                        className="cursor-pointer"
+                      />
+                      {backPreview && (
+                        <div className="mt-3 relative w-32 h-32 border-2 border-primary/20 rounded-lg overflow-hidden">
+                          <img src={backPreview} alt="Preview Verso" className="w-full h-full object-contain" />
+                        </div>
+                      )}
+                    </div>
+                  )}
 
+                  {frontPreview && (
+                    <Button type="button" variant="outline" size="sm" className="w-full">
+                      <ImageIcon className="w-4 h-4 mr-2" />
+                      Pré-visualizar Estampa
+                    </Button>
+                  )}
+                </CardContent>
               </Card>
 
               {/* Pré-visualização com Cores */}
