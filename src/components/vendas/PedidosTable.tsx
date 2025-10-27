@@ -195,6 +195,7 @@ const PedidosTable = () => {
           order={selectedOrder}
           open={!!selectedOrder}
           onClose={() => setSelectedOrder(null)}
+          onUpdate={() => queryClient.invalidateQueries({ queryKey: ["orders-active"] })}
         />
       )}
     </>

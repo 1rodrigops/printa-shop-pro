@@ -254,14 +254,19 @@ export type Database = {
       }
       orders: {
         Row: {
+          approved_at: string | null
+          approved_image_url: string | null
+          back_image_url: string | null
           created_at: string
           customer_email: string
           customer_name: string
           customer_phone: string
           etapa_producao: string | null
+          front_image_url: string | null
           id: string
           image_url: string | null
           notes: string | null
+          order_details: Json | null
           quantity: number
           shirt_color: string
           shirt_size: Database["public"]["Enums"]["shirt_size"]
@@ -270,14 +275,19 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approved_at?: string | null
+          approved_image_url?: string | null
+          back_image_url?: string | null
           created_at?: string
           customer_email: string
           customer_name: string
           customer_phone: string
           etapa_producao?: string | null
+          front_image_url?: string | null
           id?: string
           image_url?: string | null
           notes?: string | null
+          order_details?: Json | null
           quantity?: number
           shirt_color: string
           shirt_size: Database["public"]["Enums"]["shirt_size"]
@@ -286,14 +296,19 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approved_at?: string | null
+          approved_image_url?: string | null
+          back_image_url?: string | null
           created_at?: string
           customer_email?: string
           customer_name?: string
           customer_phone?: string
           etapa_producao?: string | null
+          front_image_url?: string | null
           id?: string
           image_url?: string | null
           notes?: string | null
+          order_details?: Json | null
           quantity?: number
           shirt_color?: string
           shirt_size?: Database["public"]["Enums"]["shirt_size"]

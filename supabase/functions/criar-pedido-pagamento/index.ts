@@ -35,6 +35,41 @@ interface PedidoRequest {
   };
 }
 
+// Helper para fazer upload de imagem base64 para o storage
+async function uploadBase64Image(
+  supabase: any,
+  base64Data: string,
+  filename: string
+): Promise<string | null> {
+  try {
+    // Remove o prefixo data:image/...;base64,
+    const base64String = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;
+    const buffer = Uint8Array.from(atob(base64String), c => c.charCodeAt(0));
+    
+    const { data, error } = await supabase.storage
+      .from('order-images')
+      .upload(filename, buffer, {
+        contentType: 'image/png',
+        upsert: true
+      });
+
+    if (error) {
+      console.error('Erro ao fazer upload da imagem:', error);
+      return null;
+    }
+
+    // Retornar URL pública
+    const { data: { publicUrl } } = supabase.storage
+      .from('order-images')
+      .getPublicUrl(filename);
+
+    return publicUrl;
+  } catch (error) {
+    console.error('Erro ao processar imagem:', error);
+    return null;
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -84,6 +119,30 @@ serve(async (req) => {
       );
     }
 
+    // Fazer upload das imagens se fornecidas
+    let frontImageUrl = null;
+    let backImageUrl = null;
+    
+    if (imagens?.frente) {
+      const timestamp = Date.now();
+      frontImageUrl = await uploadBase64Image(
+        supabaseAdmin,
+        imagens.frente,
+        `orders/${timestamp}_front.png`
+      );
+      console.log('Upload frente:', frontImageUrl);
+    }
+    
+    if (imagens?.verso) {
+      const timestamp = Date.now() + 1; // +1 para evitar colisão
+      backImageUrl = await uploadBase64Image(
+        supabaseAdmin,
+        imagens.verso,
+        `orders/${timestamp}_back.png`
+      );
+      console.log('Upload verso:', backImageUrl);
+    }
+
     // Determinar tamanho principal para o campo enum
     const sizesOrdered = Object.entries(produtos.tamanhos)
       .filter(([_, qty]) => qty > 0)
@@ -102,7 +161,9 @@ serve(async (req) => {
         quantity: produtos.total_pecas,
         total_price: pagamento.valor_total,
         status: 'pending',
-        notes: JSON.stringify({
+        front_image_url: frontImageUrl,
+        back_image_url: backImageUrl,
+        order_details: {
           tipo_estampa: produtos.tipo_estampa,
           tecido: produtos.tecido,
           tamanhos: produtos.tamanhos,
@@ -116,7 +177,7 @@ serve(async (req) => {
           },
           origem: 'lovable_personalizar',
           metodo_pagamento: pagamento.metodo
-        })
+        }
       })
       .select()
       .single();
