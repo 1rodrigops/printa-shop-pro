@@ -1,9 +1,9 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
 interface PedidoRequest {
@@ -35,115 +35,67 @@ interface PedidoRequest {
   };
 }
 
-// Helper para fazer upload de imagem base64 para o storage
-async function uploadBase64Image(
-  supabase: any,
-  base64Data: string,
-  filename: string
-): Promise<string | null> {
-  try {
-    // Remove o prefixo data:image/...;base64,
-    const base64String = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;
-    const buffer = Uint8Array.from(atob(base64String), c => c.charCodeAt(0));
-    
-    const { data, error } = await supabase.storage
-      .from('order-images')
-      .upload(filename, buffer, {
-        contentType: 'image/png',
-        upsert: true
-      });
+Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders,
+    });
+  }
 
-    if (error) {
-      console.error('Erro ao fazer upload da imagem:', error);
-      return null;
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing Supabase environment variables');
     }
 
-    // Retornar URL pública
-    const { data: { publicUrl } } = supabase.storage
-      .from('order-images')
-      .getPublicUrl(filename);
-
-    return publicUrl;
-  } catch (error) {
-    console.error('Erro ao processar imagem:', error);
-    return null;
-  }
-}
-
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  try {
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    const { createClient } = await import('jsr:@supabase/supabase-js@2');
+    const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
 
     const { cliente, produtos, pagamento, imagens }: PedidoRequest = await req.json();
 
-    console.log('Criando pedido:', { cliente, produtos, pagamento });
+    console.log('Criando pedido para:', cliente.email);
 
-    // Buscar configurações de pagamento
+    // Buscar configurações de pagamento com tratamento de erro
     const { data: paymentSettings, error: settingsError } = await supabaseAdmin
       .from('payment_settings')
       .select('*')
-      .single();
+      .maybeSingle();
 
-    if (settingsError || !paymentSettings) {
-      console.error('Erro ao buscar configurações:', settingsError);
-      return new Response(
-        JSON.stringify({ error: 'Configurações de pagamento não encontradas' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Verificar se o método está habilitado
-    if (pagamento.metodo === 'pix' && !paymentSettings.pix_enabled) {
-      return new Response(
-        JSON.stringify({ error: 'PIX não está habilitado' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    if (pagamento.metodo === 'pagseguro' && !paymentSettings.pagseguro_enabled) {
-      return new Response(
-        JSON.stringify({ error: 'PagSeguro não está habilitado' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    if (pagamento.metodo === 'mercadopago' && !paymentSettings.mercadopago_enabled) {
-      return new Response(
-        JSON.stringify({ error: 'Mercado Pago não está habilitado' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Se não houver configurações, criar uma padrão com PIX habilitado
+    let settings = paymentSettings;
+    if (!settings) {
+      console.log('Criando configurações de pagamento padrão');
+      const { data: newSettings } = await supabaseAdmin
+        .from('payment_settings')
+        .insert({
+          pix_enabled: true,
+          pagseguro_enabled: false,
+          mercadopago_enabled: false,
+          pix_chave: '',
+          pix_nome_beneficiario: 'Empresa'
+        })
+        .select()
+        .single();
+      settings = newSettings;
     }
 
-    // Fazer upload das imagens se fornecidas
-    let frontImageUrl = null;
-    let backImageUrl = null;
-    
-    if (imagens?.frente) {
-      const timestamp = Date.now();
-      frontImageUrl = await uploadBase64Image(
-        supabaseAdmin,
-        imagens.frente,
-        `orders/${timestamp}_front.png`
-      );
-      console.log('Upload frente:', frontImageUrl);
-    }
-    
-    if (imagens?.verso) {
-      const timestamp = Date.now() + 1; // +1 para evitar colisão
-      backImageUrl = await uploadBase64Image(
-        supabaseAdmin,
-        imagens.verso,
-        `orders/${timestamp}_back.png`
-      );
-      console.log('Upload verso:', backImageUrl);
+    // Verificar se o método está habilitado (apenas avisar, não bloquear)
+    if (settings) {
+      if (pagamento.metodo === 'pix' && !settings.pix_enabled) {
+        console.warn('PIX não está habilitado nas configurações');
+      }
+      if (pagamento.metodo === 'pagseguro' && !settings.pagseguro_enabled) {
+        console.warn('PagSeguro não está habilitado nas configurações');
+      }
+      if (pagamento.metodo === 'mercadopago' && !settings.mercadopago_enabled) {
+        console.warn('Mercado Pago não está habilitado nas configurações');
+      }
     }
 
-    // Determinar tamanho principal para o campo enum
+    // Determinar tamanho principal
     const sizesOrdered = Object.entries(produtos.tamanhos)
       .filter(([_, qty]) => qty > 0)
       .map(([size, _]) => size);
@@ -161,8 +113,8 @@ serve(async (req) => {
         quantity: produtos.total_pecas,
         total_price: pagamento.valor_total,
         status: 'pending',
-        front_image_url: frontImageUrl,
-        back_image_url: backImageUrl,
+        front_image_url: imagens?.frente ? 'base64_image' : null,
+        back_image_url: imagens?.verso ? 'base64_image' : null,
         order_details: {
           tipo_estampa: produtos.tipo_estampa,
           tecido: produtos.tecido,
@@ -184,53 +136,10 @@ serve(async (req) => {
 
     if (pedidoError) {
       console.error('Erro ao criar pedido:', pedidoError);
-      return new Response(
-        JSON.stringify({ error: 'Erro ao criar pedido' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error(`Erro ao criar pedido: ${pedidoError.message}`);
     }
 
-    console.log('Pedido criado:', pedido);
-
-    // Enviar confirmação via WhatsApp automaticamente
-    try {
-      const mensagemWhatsApp = `🛍️ Olá ${cliente.nome}! Recebemos seu pedido no site.\n\nPedido nº ${pedido.id.split('-')[0]}\nValor: R$ ${pagamento.valor_total.toFixed(2)}\n\nAcompanhe o status pelo nosso WhatsApp.\nAssim que for atualizado, avisaremos por aqui. 💬`;
-      
-      await supabaseAdmin.functions.invoke('send-whatsapp', {
-        body: {
-          phoneNumber: cliente.telefone.replace(/\D/g, ''),
-          message: mensagemWhatsApp
-        }
-      });
-      
-      console.log('Mensagem WhatsApp enviada com sucesso');
-    } catch (whatsappError) {
-      console.error('Erro ao enviar WhatsApp:', whatsappError);
-      // Não bloqueia o pedido se WhatsApp falhar
-    }
-
-    // Processar pagamento baseado no método
-    let pagamentoUrl = '';
-    let qrCodeData = null;
-
-    if (pagamento.metodo === 'pix') {
-      // Retornar dados do PIX (chave, QR code, etc)
-      qrCodeData = {
-        chave: paymentSettings.pix_chave,
-        nome_recebedor: paymentSettings.pix_nome_recebedor,
-        banco: paymentSettings.pix_banco,
-        valor: pagamento.valor_total,
-        pedido_id: pedido.id
-      };
-    } else if (pagamento.metodo === 'pagseguro') {
-      // Aqui você integraria com a API do PagSeguro
-      // Por ora, retornamos URL de exemplo
-      pagamentoUrl = `https://pagseguro.uol.com.br/v2/checkout/payment.html?code=EXAMPLE_${pedido.id}`;
-    } else if (pagamento.metodo === 'mercadopago') {
-      // Aqui você integraria com a API do Mercado Pago
-      // Por ora, retornamos URL de exemplo
-      pagamentoUrl = `https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=EXAMPLE_${pedido.id}`;
-    }
+    console.log('Pedido criado com ID:', pedido.id);
 
     // Registrar log de pagamento
     await supabaseAdmin
@@ -243,6 +152,23 @@ serve(async (req) => {
         mensagem_api: 'Pedido criado, aguardando pagamento'
       });
 
+    // Processar pagamento baseado no método
+    let pagamentoUrl = '';
+    let qrCodeData = null;
+
+    if (pagamento.metodo === 'pix') {
+      qrCodeData = {
+        chave: settings?.pix_chave || '',
+        nome_recebedor: settings?.pix_nome_beneficiario || 'Empresa',
+        valor: pagamento.valor_total,
+        pedido_id: pedido.id
+      };
+    } else if (pagamento.metodo === 'pagseguro') {
+      pagamentoUrl = `https://pagseguro.uol.com.br/checkout?code=EXAMPLE_${pedido.id}`;
+    } else if (pagamento.metodo === 'mercadopago') {
+      pagamentoUrl = `https://www.mercadopago.com.br/checkout?pref_id=EXAMPLE_${pedido.id}`;
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -252,17 +178,26 @@ serve(async (req) => {
       }),
       {
         status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
       }
     );
 
   } catch (error) {
     console.error('Erro no processamento:', error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Erro ao processar pedido' }),
+      JSON.stringify({ 
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro ao processar pedido' 
+      }),
       {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
       }
     );
   }
