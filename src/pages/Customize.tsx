@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Check, MessageCircle, Shirt, Sparkles, Package, Image as ImageIcon, Plus, Minus, CreditCard } from "lucide-react";
+import { Upload, Check, MessageCircle, Shirt, Sparkles, Package, Image as ImageIcon, Plus, Minus, CreditCard, UserCircle } from "lucide-react";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import { ModalPagamento } from "@/components/pagamento/ModalPagamento";
 import { supabase } from "@/integrations/supabase/client";
+import { PasswordInput } from "@/components/PasswordInput";
+import { PasswordConfirmInput } from "@/components/PasswordConfirmInput";
 
 type PrintType = "front" | "both";
 type FabricType = "cotton" | "dryfit" | "premium";
@@ -39,6 +41,15 @@ const Customize = () => {
   const [frontPreview, setFrontPreview] = useState<string>("");
   const [backPreview, setBackPreview] = useState<string>("");
   
+  const [showLoginStep, setShowLoginStep] = useState(true);
+  const [hasAccount, setHasAccount] = useState<boolean | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [registerPassword, setRegisterPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
   const [formData, setFormData] = useState({
     customerName: "",
     customerEmail: "",
@@ -55,6 +66,116 @@ const Customize = () => {
   const [modalPagamentoOpen, setModalPagamentoOpen] = useState(false);
   const [dadosPagamento, setDadosPagamento] = useState<any>(null);
   const [processando, setProcessando] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setIsAuthenticated(true);
+        setShowLoginStep(false);
+        setFormData(prev => ({
+          ...prev,
+          customerEmail: session.user.email || "",
+        }));
+      }
+    };
+    checkAuth();
+  }, []);
+
+  const handleLogin = async () => {
+    if (!loginEmail || !loginPassword) {
+      toast.error("Preencha email e senha para fazer login");
+      return;
+    }
+
+    setIsLoggingIn(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: loginPassword,
+      });
+
+      if (error) throw error;
+
+      toast.success("Login realizado com sucesso!");
+      setIsAuthenticated(true);
+      setShowLoginStep(false);
+      setFormData(prev => ({
+        ...prev,
+        customerEmail: data.user.email || "",
+      }));
+    } catch (error: any) {
+      toast.error("Erro ao fazer login", {
+        description: error.message === "Invalid login credentials"
+          ? "Email ou senha incorretos"
+          : error.message
+      });
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const validatePasswordStrength = (password: string): boolean => {
+    const requirements = {
+      length: password.length >= 9,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /[0-9]/.test(password),
+      special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+      noSpaces: !/\s/.test(password),
+    };
+    return Object.values(requirements).every(Boolean);
+  };
+
+  const handleRegister = async () => {
+    if (!formData.customerName || !formData.customerEmail) {
+      toast.error("Preencha nome e email para criar sua conta");
+      return;
+    }
+
+    if (!registerPassword) {
+      toast.error("Defina uma senha para sua conta");
+      return;
+    }
+
+    if (!validatePasswordStrength(registerPassword)) {
+      toast.error("Senha não atende aos requisitos de segurança");
+      return;
+    }
+
+    if (registerPassword !== confirmPassword) {
+      toast.error("As senhas não coincidem");
+      return;
+    }
+
+    setIsLoggingIn(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.customerEmail,
+        password: registerPassword,
+        options: {
+          data: {
+            nome_completo: formData.customerName,
+            telefone: formData.customerPhone,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      toast.success("Conta criada com sucesso!", {
+        description: "Você já pode continuar com seu pedido"
+      });
+      setIsAuthenticated(true);
+      setShowLoginStep(false);
+    } catch (error: any) {
+      toast.error("Erro ao criar conta", {
+        description: error.message
+      });
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
 
   const colors = [
     { name: "Branco", hex: "#FFFFFF", border: true },
@@ -253,6 +374,186 @@ const Customize = () => {
       setProcessando(false);
     }
   };
+
+  if (showLoginStep) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+        <Navbar />
+
+        <div className="container mx-auto px-4 pt-24 pb-20">
+          <div className="text-center mb-12 animate-fade-in">
+            <Badge className="mb-4 bg-accent text-accent-foreground">
+              🎉 Promoção válida até 31/10/2025
+            </Badge>
+            <h1 className="text-4xl md:text-6xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+                Camiseta Personalizada Profissional
+              </span>
+            </h1>
+          </div>
+
+          <div className="max-w-2xl mx-auto">
+            {hasAccount === null ? (
+              <Card className="border-2 border-primary/20">
+                <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
+                  <CardTitle className="flex items-center gap-2 text-2xl">
+                    <UserCircle className="w-6 h-6" />
+                    Bem-vindo! Vamos começar
+                  </CardTitle>
+                  <CardDescription className="text-base">
+                    Para fazer seu pedido, você precisa ter uma conta
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                  <p className="text-center text-muted-foreground mb-6">
+                    Você já possui uma conta cadastrada?
+                  </p>
+                  <div className="grid gap-3">
+                    <Button
+                      onClick={() => setHasAccount(true)}
+                      size="lg"
+                      className="w-full text-lg py-6"
+                    >
+                      Sim, já tenho conta
+                    </Button>
+                    <Button
+                      onClick={() => setHasAccount(false)}
+                      variant="outline"
+                      size="lg"
+                      className="w-full text-lg py-6"
+                    >
+                      Não, quero criar uma conta
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : hasAccount ? (
+              <Card className="border-2 border-primary/20">
+                <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
+                  <CardTitle>Login</CardTitle>
+                  <CardDescription>
+                    Entre com seu email e senha para continuar
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                  <div>
+                    <Label htmlFor="login-email">Email *</Label>
+                    <Input
+                      id="login-email"
+                      type="email"
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      placeholder="seu@email.com"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="login-password">Senha *</Label>
+                    <Input
+                      id="login-password"
+                      type="password"
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      placeholder="Digite sua senha"
+                    />
+                  </div>
+                  <div className="flex gap-3 pt-4">
+                    <Button
+                      onClick={handleLogin}
+                      disabled={isLoggingIn}
+                      className="flex-1"
+                    >
+                      {isLoggingIn ? "Entrando..." : "Entrar"}
+                    </Button>
+                    <Button
+                      onClick={() => setHasAccount(null)}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      Voltar
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-2 border-primary/20">
+                <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
+                  <CardTitle>Criar Conta</CardTitle>
+                  <CardDescription>
+                    Preencha seus dados para criar sua conta e fazer o pedido
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                  <div>
+                    <Label htmlFor="register-name">Nome Completo *</Label>
+                    <Input
+                      id="register-name"
+                      value={formData.customerName}
+                      onChange={(e) => setFormData({...formData, customerName: e.target.value})}
+                      placeholder="Seu nome completo"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="register-email">Email *</Label>
+                    <Input
+                      id="register-email"
+                      type="email"
+                      value={formData.customerEmail}
+                      onChange={(e) => setFormData({...formData, customerEmail: e.target.value})}
+                      placeholder="seu@email.com"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="register-phone">WhatsApp *</Label>
+                    <Input
+                      id="register-phone"
+                      type="tel"
+                      value={formData.customerPhone}
+                      onChange={(e) => setFormData({...formData, customerPhone: e.target.value})}
+                      placeholder="(41) 99999-9999"
+                    />
+                  </div>
+                  <div>
+                    <PasswordInput
+                      value={registerPassword}
+                      onChange={setRegisterPassword}
+                      label="Senha"
+                      placeholder="Crie uma senha segura"
+                      showStrengthIndicator={true}
+                    />
+                  </div>
+                  <div>
+                    <PasswordConfirmInput
+                      value={confirmPassword}
+                      onChange={setConfirmPassword}
+                      passwordValue={registerPassword}
+                      label="Confirmar Senha"
+                      placeholder="Digite sua senha novamente"
+                    />
+                  </div>
+                  <div className="flex gap-3 pt-4">
+                    <Button
+                      onClick={handleRegister}
+                      disabled={isLoggingIn}
+                      className="flex-1"
+                    >
+                      {isLoggingIn ? "Criando conta..." : "Criar Conta e Continuar"}
+                    </Button>
+                    <Button
+                      onClick={() => setHasAccount(null)}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      Voltar
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">

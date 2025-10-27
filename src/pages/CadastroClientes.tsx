@@ -43,6 +43,16 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { PasswordInput } from "@/components/PasswordInput";
+import { PasswordConfirmInput } from "@/components/PasswordConfirmInput";
+
+const passwordRequirements = z.string()
+  .min(9, "Senha deve ter no mínimo 9 caracteres")
+  .regex(/[A-Z]/, "Senha deve conter pelo menos uma letra maiúscula")
+  .regex(/[a-z]/, "Senha deve conter pelo menos uma letra minúscula")
+  .regex(/[0-9]/, "Senha deve conter pelo menos um número")
+  .regex(/[!@#$%^&*(),.?":{}|<>]/, "Senha deve conter pelo menos um símbolo especial")
+  .refine((val) => !/\s/.test(val), "Senha não pode conter espaços");
 
 const clienteSchema = z.object({
   nome_completo: z.string()
@@ -61,6 +71,9 @@ const clienteSchema = z.object({
     .trim()
     .email("E-mail inválido")
     .max(255, "E-mail deve ter no máximo 255 caracteres"),
+  criar_login: z.boolean().optional(),
+  senha: z.union([passwordRequirements, z.literal("")]).optional(),
+  confirmar_senha: z.string().optional().or(z.literal("")),
   endereco_rua: z.string().trim().max(200).optional(),
   endereco_numero: z.string().trim().max(20).optional(),
   endereco_bairro: z.string().trim().max(100).optional(),
@@ -68,6 +81,14 @@ const clienteSchema = z.object({
   endereco_uf: z.string().trim().max(2).optional(),
   cep: z.string().trim().max(10).optional(),
   observacoes: z.string().trim().max(1000).optional(),
+}).refine((data) => {
+  if (data.criar_login && data.senha && data.senha !== data.confirmar_senha) {
+    return false;
+  }
+  return true;
+}, {
+  message: "As senhas não coincidem",
+  path: ["confirmar_senha"],
 });
 
 type ClienteFormData = z.infer<typeof clienteSchema>;
@@ -92,6 +113,9 @@ const CadastroClientes = () => {
   const [deletingCliente, setDeletingCliente] = useState<Cliente | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
+  const [criarLogin, setCriarLogin] = useState(false);
+  const [senha, setSenha] = useState("");
+  const [confirmarSenha, setConfirmarSenha] = useState("");
 
   const {
     register,
@@ -169,6 +193,69 @@ const CadastroClientes = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
+      if (criarLogin && !editingCliente) {
+        if (!senha) {
+          toast({
+            title: "Senha obrigatória",
+            description: "Defina uma senha para criar o login do cliente.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (senha !== confirmarSenha) {
+          toast({
+            title: "Senhas não coincidem",
+            description: "Verifique e tente novamente.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          const response = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-users`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session?.access_token}`,
+              },
+              body: JSON.stringify({
+                action: "create",
+                data: {
+                  email: data.email,
+                  password: senha,
+                  nome_completo: data.nome_completo,
+                  telefone: data.telefone,
+                  status: "ativo",
+                  role: "cliente",
+                },
+              }),
+            }
+          );
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            throw new Error(result.error || "Erro ao criar login do cliente");
+          }
+
+          toast({
+            title: "Login criado!",
+            description: `Login criado para ${data.email}`,
+          });
+        } catch (error: any) {
+          toast({
+            title: "Erro ao criar login",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
       if (editingCliente) {
         const { error } = await supabase
           .from("clientes")
@@ -223,6 +310,9 @@ const CadastroClientes = () => {
 
       reset();
       setEditingCliente(null);
+      setCriarLogin(false);
+      setSenha("");
+      setConfirmarSenha("");
       fetchClientes();
     } catch (error: any) {
       toast({
@@ -279,6 +369,9 @@ const CadastroClientes = () => {
   const handleClear = () => {
     reset();
     setEditingCliente(null);
+    setCriarLogin(false);
+    setSenha("");
+    setConfirmarSenha("");
   };
 
   const exportarCSV = () => {
@@ -446,6 +539,66 @@ const CadastroClientes = () => {
                   )}
                 </div>
               </div>
+
+              {!editingCliente && (
+                <Card className="border-2 border-primary/20 bg-primary/5">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Criar Login de Acesso?</CardTitle>
+                    <CardDescription>
+                      O cliente poderá fazer login no sistema com email e senha
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          setCriarLogin(true);
+                        }}
+                        variant={criarLogin ? "default" : "outline"}
+                        className="flex-1"
+                      >
+                        Sim, criar login
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          setCriarLogin(false);
+                          setSenha("");
+                          setConfirmarSenha("");
+                        }}
+                        variant={!criarLogin ? "default" : "outline"}
+                        className="flex-1"
+                      >
+                        Não criar login
+                      </Button>
+                    </div>
+
+                    {criarLogin && (
+                      <div className="space-y-4 pt-4 border-t">
+                        <div>
+                          <PasswordInput
+                            value={senha}
+                            onChange={setSenha}
+                            label="Senha de Acesso"
+                            placeholder="Crie uma senha segura para o cliente"
+                            showStrengthIndicator={true}
+                          />
+                        </div>
+                        <div>
+                          <PasswordConfirmInput
+                            value={confirmarSenha}
+                            onChange={setConfirmarSenha}
+                            passwordValue={senha}
+                            label="Confirmar Senha"
+                            placeholder="Digite a senha novamente"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
               <div className="grid gap-4 md:grid-cols-3">
                 <div>
