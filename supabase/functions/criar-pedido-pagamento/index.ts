@@ -84,6 +84,12 @@ serve(async (req) => {
       );
     }
 
+    // Determinar tamanho principal para o campo enum
+    const sizesOrdered = Object.entries(produtos.tamanhos)
+      .filter(([_, qty]) => qty > 0)
+      .map(([size, _]) => size);
+    const mainSize = sizesOrdered.length > 0 ? sizesOrdered[0] : 'M';
+
     // Criar pedido no banco
     const { data: pedido, error: pedidoError } = await supabaseAdmin
       .from('orders')
@@ -92,7 +98,7 @@ serve(async (req) => {
         customer_email: cliente.email,
         customer_phone: cliente.telefone,
         shirt_color: produtos.cor,
-        shirt_size: 'Variados',
+        shirt_size: mainSize,
         quantity: produtos.total_pecas,
         total_price: pagamento.valor_total,
         status: 'pending',
