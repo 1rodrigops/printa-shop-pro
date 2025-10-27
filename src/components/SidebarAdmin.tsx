@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Users, Package, ClipboardList, FileText,
   ShoppingCart, BarChart3, Settings,
   CreditCard, Database, Server, LogOut, ChevronDown, ChevronRight,
-  Shirt, Truck, UserCog, Shield, Bell
+  Shirt, Truck, UserCog, Shield, Bell, AlertTriangle
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -19,6 +19,39 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
+type UserRole = "superadmin" | "admin" | "moderator" | "cliente" | "user" | null;
+
+function normalize(v?: string | null): string {
+  return (v || "").toLowerCase().replace(/\s+/g, "_").trim();
+}
+
+function canSeeAdminPanel(role: UserRole, userEmail?: string): boolean {
+  if (!role) {
+    return false;
+  }
+
+  const allowedEmails = [
+    "marketing@agilgas.com.br",
+    "adm@agilgas.com.br",
+    "admin@agilgas.com.br",
+  ];
+
+  if (userEmail && allowedEmails.includes(userEmail.toLowerCase())) {
+    return true;
+  }
+
+  const normalizedRole = normalize(role);
+  const allowedRoles = new Set([
+    "admin",
+    "super_admin",
+    "superadmin",
+    "owner",
+    "root",
+  ]);
+
+  return allowedRoles.has(normalizedRole);
+}
 
 interface MenuItem {
   id: string;
@@ -110,10 +143,23 @@ export default function SidebarAdmin() {
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { role, loading } = useUserRole();
+
+  useEffect(() => {
+    const fetchUserEmail = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserEmail(user?.email || null);
+    };
+    fetchUserEmail();
+  }, []);
+
+  const hasFullAccess = useMemo(() => {
+    return canSeeAdminPanel(role, userEmail || undefined);
+  }, [role, userEmail]);
 
   const toggleSection = (sectionId: string) => {
     setOpenSection(openSection === sectionId ? null : sectionId);
@@ -142,15 +188,14 @@ export default function SidebarAdmin() {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const hasFullAccess = role && ["admin", "superadmin"].includes(role);
   const filteredMenuItems = menuItems.filter(item => hasAccess(item.roles));
 
-  if (loading) {
+  if (loading || userEmail === null) {
     return (
       <aside className="w-64 bg-gray-900 text-gray-400 p-4 min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p>Carregando...</p>
+          <p className="text-sm">Carregando usuário...</p>
         </div>
       </aside>
     );
@@ -158,17 +203,26 @@ export default function SidebarAdmin() {
 
   if (!hasFullAccess) {
     return (
-      <aside className="w-64 bg-gray-900 text-gray-400 p-4 min-h-screen flex items-center justify-center">
-        <div className="text-center px-4">
-          <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-white text-lg font-bold mb-2">Acesso Restrito</h2>
-          <p className="text-sm mb-4">
-            Entre como administrador ou super administrador para visualizar o painel.
-          </p>
-          <p className="text-xs text-gray-500">
-            Sua role atual: {role || "sem permissão"}
-          </p>
+      <aside className="w-64 min-h-screen bg-[#0f172a] text-gray-300 p-6 flex flex-col items-center justify-center">
+        <div className="rounded-full border-2 border-red-500/40 p-4 mb-4 bg-red-500/10">
+          <AlertTriangle className="w-12 h-12 text-red-500" />
         </div>
+        <h3 className="text-white font-bold text-lg mb-2">Acesso Restrito</h3>
+        <p className="text-xs text-center opacity-80 mb-3 max-w-[200px]">
+          Entre como administrador ou super administrador para visualizar o painel.
+        </p>
+        <div className="bg-gray-800/50 rounded-lg p-3 text-[10px] font-mono">
+          <p className="opacity-60 mb-1">Email:</p>
+          <p className="text-white">{userEmail}</p>
+          <p className="opacity-60 mt-2 mb-1">Role:</p>
+          <p className="text-orange-400">{role || "sem permissão"}</p>
+        </div>
+        <button
+          onClick={() => navigate("/auth")}
+          className="mt-4 text-xs text-orange-500 hover:text-orange-400 underline"
+        >
+          Fazer login com outra conta
+        </button>
       </aside>
     );
   }
