@@ -143,19 +143,10 @@ export default function SidebarAdmin() {
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { role, loading } = useUserRole();
-
-  useEffect(() => {
-    const fetchUserEmail = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUserEmail(user?.email || null);
-    };
-    fetchUserEmail();
-  }, []);
+  const { role, loading, userEmail, debugInfo } = useUserRole();
 
   const hasFullAccess = useMemo(() => {
     return canSeeAdminPanel(role, userEmail || undefined);
@@ -190,7 +181,7 @@ export default function SidebarAdmin() {
 
   const filteredMenuItems = menuItems.filter(item => hasAccess(item.roles));
 
-  if (loading || userEmail === null) {
+  if (loading) {
     return (
       <aside className="w-64 bg-gray-900 text-gray-400 p-4 min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -211,12 +202,38 @@ export default function SidebarAdmin() {
         <p className="text-xs text-center opacity-80 mb-3 max-w-[200px]">
           Entre como administrador ou super administrador para visualizar o painel.
         </p>
-        <div className="bg-gray-800/50 rounded-lg p-3 text-[10px] font-mono">
-          <p className="opacity-60 mb-1">Email:</p>
-          <p className="text-white">{userEmail}</p>
-          <p className="opacity-60 mt-2 mb-1">Role:</p>
-          <p className="text-orange-400">{role || "sem permissão"}</p>
+
+        <div className="bg-gray-800/50 rounded-lg p-3 text-[10px] font-mono w-full max-w-[240px] space-y-2">
+          <div>
+            <p className="opacity-60 mb-1">Email:</p>
+            <p className="text-white break-all">{userEmail || "não detectado"}</p>
+          </div>
+
+          <div>
+            <p className="opacity-60 mb-1">Role detectada:</p>
+            <p className="text-orange-400">{role || "null"}</p>
+          </div>
+
+          <div>
+            <p className="opacity-60 mb-1">Status:</p>
+            <p className="text-red-400">{debugInfo.detectedRole || "não carregado"}</p>
+          </div>
+
+          <div>
+            <p className="opacity-60 mb-1">User ID:</p>
+            <p className="text-gray-400 text-[8px] break-all">{debugInfo.userId || "n/a"}</p>
+          </div>
+
+          <div>
+            <p className="opacity-60 mb-1">Raw Roles:</p>
+            <p className="text-gray-400 text-[8px]">
+              {debugInfo.rawRoles.length > 0
+                ? JSON.stringify(debugInfo.rawRoles)
+                : "nenhuma role encontrada"}
+            </p>
+          </div>
         </div>
+
         <button
           onClick={() => navigate("/auth")}
           className="mt-4 text-xs text-orange-500 hover:text-orange-400 underline"
