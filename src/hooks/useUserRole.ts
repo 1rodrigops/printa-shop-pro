@@ -30,13 +30,16 @@ export const useUserRole = () => {
           const roleHierarchy: UserRole[] = ["superadmin", "admin", "moderator", "cliente", "user"];
 
           const userRoles = data.map(r => r.role as UserRole);
+          console.log("User roles found:", userRoles);
 
           const highestRole = roleHierarchy.find(hierarchyRole =>
             userRoles.includes(hierarchyRole)
           );
 
+          console.log("Highest role assigned:", highestRole);
           setRole(highestRole || null);
         } else {
+          console.log("No roles found for user");
           setRole(null);
         }
       } catch (error) {
