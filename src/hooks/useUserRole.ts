@@ -11,7 +11,7 @@ export const useUserRole = () => {
     const fetchRole = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        
+
         if (!user) {
           setRole(null);
           setLoading(false);
@@ -21,14 +21,23 @@ export const useUserRole = () => {
         const { data, error } = await supabase
           .from("user_roles")
           .select("role")
-          .eq("user_id", user.id)
-          .single();
+          .eq("user_id", user.id);
 
         if (error) {
           console.error("Error fetching role:", error);
           setRole(null);
+        } else if (data && data.length > 0) {
+          const roleHierarchy: UserRole[] = ["superadmin", "admin", "moderator", "cliente", "user"];
+
+          const userRoles = data.map(r => r.role as UserRole);
+
+          const highestRole = roleHierarchy.find(hierarchyRole =>
+            userRoles.includes(hierarchyRole)
+          );
+
+          setRole(highestRole || null);
         } else {
-          setRole(data?.role as UserRole);
+          setRole(null);
         }
       } catch (error) {
         console.error("Error fetching role:", error);
