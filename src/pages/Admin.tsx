@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import AdminNavbar from "@/components/AdminNavbar";
+import AdminLayout from "@/layouts/AdminLayout";
 import { Package, Clock, CheckCircle, XCircle, DollarSign, TrendingUp, Calendar, ShoppingBag, BarChart3 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
 import type { User } from '@supabase/supabase-js';
@@ -218,10 +218,8 @@ const Admin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <AdminNavbar />
-      
-      <div className="container mx-auto px-4 pt-24 pb-20">
+    <AdminLayout>
+      <div className="container mx-auto px-6 py-8">
         <div className="mb-12 flex justify-between items-start">
           <div>
             <h1 className="text-5xl font-bold mb-4">
@@ -537,7 +535,7 @@ const Admin = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

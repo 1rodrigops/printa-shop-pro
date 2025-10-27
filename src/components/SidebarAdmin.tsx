@@ -1,0 +1,270 @@
+import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Users, Package, ClipboardList, FileText,
+  ShoppingCart, BarChart3, Settings,
+  CreditCard, Database, Server, LogOut, ChevronDown, ChevronRight,
+  Shirt, Truck, UserCog, Shield, Bell
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { useUserRole } from "@/hooks/useUserRole";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+interface MenuItem {
+  id: string;
+  icon: any;
+  label: string;
+  path?: string;
+  roles: string[];
+  submenu?: {
+    label: string;
+    path: string;
+    roles: string[];
+  }[];
+}
+
+const menuItems: MenuItem[] = [
+  {
+    id: "cadastro",
+    icon: Users,
+    label: "Cadastro",
+    roles: ["superadmin"],
+    submenu: [
+      { label: "Clientes", path: "/admin/cadastro/clientes", roles: ["superadmin"] },
+      { label: "Fornecedores", path: "/admin/cadastro/fornecedores", roles: ["superadmin"] },
+      { label: "Usuários", path: "/admin/cadastro/usuarios", roles: ["superadmin"] },
+      { label: "Permissões", path: "/admin/cadastro/permissoes", roles: ["superadmin"] },
+      { label: "Produtos", path: "/admin/cadastro/produtos", roles: ["superadmin", "admin"] },
+    ],
+  },
+  {
+    id: "vendas",
+    icon: ShoppingCart,
+    label: "Vendas",
+    roles: ["superadmin", "admin"],
+    submenu: [
+      { label: "Pedidos", path: "/admin/vendas/pedidos", roles: ["superadmin", "admin"] },
+      { label: "Vendas do Dia", path: "/admin/vendas/diarias", roles: ["superadmin", "admin"] },
+      { label: "Histórico", path: "/admin/vendas/historico", roles: ["superadmin", "admin"] },
+      { label: "Produção Interna", path: "/admin/vendas/producao", roles: ["superadmin", "admin"] },
+      { label: "Qualidade e Entrega", path: "/admin/vendas/qualidade-entrega", roles: ["superadmin", "admin"] },
+      { label: "Relatórios Integrados", path: "/admin/vendas/relatorios", roles: ["superadmin", "admin"] },
+    ],
+  },
+  {
+    id: "financeiro",
+    icon: CreditCard,
+    label: "Financeiro",
+    roles: ["superadmin", "admin"],
+    submenu: [
+      { label: "Formas de Pagamento", path: "/admin/financeiro/forma-de-pagamento", roles: ["superadmin", "admin"] },
+      { label: "Contas a Pagar", path: "/admin/financeiro/pagar", roles: ["superadmin", "admin"] },
+      { label: "Contas a Receber", path: "/admin/financeiro/receber", roles: ["superadmin", "admin"] },
+      { label: "Caixa Diário", path: "/admin/financeiro/caixa", roles: ["superadmin", "admin"] },
+    ],
+  },
+  {
+    id: "estoque",
+    icon: Package,
+    label: "Estoque",
+    path: "/admin/estoque",
+    roles: ["superadmin", "admin"],
+  },
+  {
+    id: "relatorios",
+    icon: BarChart3,
+    label: "Relatórios",
+    roles: ["superadmin", "admin"],
+    submenu: [
+      { label: "Relatório Semanal", path: "/admin/relatorios/semanal", roles: ["superadmin", "admin"] },
+      { label: "Relatório Mensal", path: "/admin/relatorios/mensal", roles: ["superadmin", "admin"] },
+      { label: "Logs de Auditoria", path: "/admin/relatorios/logs", roles: ["superadmin", "admin"] },
+    ],
+  },
+  {
+    id: "utilidades",
+    icon: Settings,
+    label: "Utilidades",
+    roles: ["superadmin"],
+    submenu: [
+      { label: "Configurações", path: "/admin/utilidades/configuracoes", roles: ["superadmin"] },
+      { label: "Backup", path: "/admin/utilidades/backup", roles: ["superadmin"] },
+      { label: "Logs do Sistema", path: "/admin/utilidades/logs", roles: ["superadmin"] },
+      { label: "API WhatsApp", path: "/admin/utilidades/api-whatsapp", roles: ["superadmin"] },
+      { label: "Logs de Mensagens", path: "/admin/utilidades/logs-whatsapp", roles: ["superadmin", "admin"] },
+    ],
+  },
+];
+
+export default function SidebarAdmin() {
+  const [openSection, setOpenSection] = useState<string | null>(null);
+  const [collapsed, setCollapsed] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { role } = useUserRole();
+
+  const toggleSection = (sectionId: string) => {
+    setOpenSection(openSection === sectionId ? null : sectionId);
+  };
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Erro ao sair",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      navigate("/auth");
+      toast({
+        title: "Logout realizado",
+        description: "Você saiu com sucesso.",
+      });
+    }
+  };
+
+  const hasAccess = (roles: string[]) => {
+    return role && roles.includes(role);
+  };
+
+  const isActive = (path: string) => location.pathname === path;
+
+  const filteredMenuItems = menuItems.filter(item => hasAccess(item.roles));
+
+  return (
+    <>
+      <aside
+        className={`bg-[#111] text-white ${
+          collapsed ? "w-20" : "w-64"
+        } min-h-screen p-4 flex flex-col transition-all duration-300 shadow-lg`}
+      >
+        <div
+          className="flex items-center justify-between mb-6 cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => setCollapsed(!collapsed)}
+        >
+          {!collapsed && (
+            <div className="flex items-center gap-2">
+              <Shirt className="w-8 h-8 text-orange-500" />
+              <h1 className="text-xl font-bold text-orange-500">StampShirts</h1>
+            </div>
+          )}
+          {collapsed && <Shirt className="w-8 h-8 text-orange-500 mx-auto" />}
+          <ChevronRight
+            className={`w-5 h-5 transform ${
+              collapsed ? "rotate-0" : "rotate-180"
+            } transition-transform`}
+          />
+        </div>
+
+        <div className="flex-1 space-y-2 overflow-y-auto">
+          {filteredMenuItems.map((item) => {
+            const Icon = item.icon;
+            const isOpen = openSection === item.id;
+
+            if (item.submenu) {
+              const filteredSubmenu = item.submenu.filter(sub => hasAccess(sub.roles));
+
+              if (filteredSubmenu.length === 0) return null;
+
+              return (
+                <div key={item.id}>
+                  <button
+                    onClick={() => toggleSection(item.id)}
+                    className="flex items-center justify-between w-full text-left py-2 px-3 rounded-md hover:bg-gray-800 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className="w-5 h-5 flex-shrink-0" />
+                      {!collapsed && <span>{item.label}</span>}
+                    </div>
+                    {!collapsed && (
+                      <ChevronDown
+                        className={`w-4 h-4 transform transition-transform ${
+                          isOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    )}
+                  </button>
+                  {isOpen && !collapsed && (
+                    <ul className="ml-8 mt-1 space-y-1">
+                      {filteredSubmenu.map((subItem) => (
+                        <li key={subItem.path}>
+                          <Link
+                            to={subItem.path}
+                            className={`block py-2 px-3 rounded-md text-sm transition-colors ${
+                              isActive(subItem.path)
+                                ? "bg-orange-500 text-white"
+                                : "hover:bg-gray-800"
+                            }`}
+                          >
+                            {subItem.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              );
+            }
+
+            if (item.path) {
+              return (
+                <Link
+                  key={item.id}
+                  to={item.path}
+                  className={`flex items-center gap-3 py-2 px-3 rounded-md transition-colors ${
+                    isActive(item.path)
+                      ? "bg-orange-500 text-white"
+                      : "hover:bg-gray-800"
+                  }`}
+                >
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  {!collapsed && <span>{item.label}</span>}
+                </Link>
+              );
+            }
+
+            return null;
+          })}
+        </div>
+
+        <div className="mt-auto pt-4 border-t border-gray-800">
+          <button
+            onClick={() => setShowLogoutDialog(true)}
+            className="flex items-center gap-3 w-full py-2 px-3 rounded-md hover:bg-red-900/50 hover:text-red-300 transition-colors"
+          >
+            <LogOut className="w-5 h-5 flex-shrink-0" />
+            {!collapsed && <span>Sair</span>}
+          </button>
+        </div>
+      </aside>
+
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent className="bg-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar logout</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja sair do sistema?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout}>Sair</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
