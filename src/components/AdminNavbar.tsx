@@ -146,6 +146,10 @@ const AdminNavbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
+  console.log("=== AdminNavbar Debug ===");
+  console.log("Current role:", role);
+  console.log("Filtered menu items:", menuItems.filter(item => role && item.allowedRoles.includes(role)));
+
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {

@@ -12,7 +12,12 @@ export const useUserRole = () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
 
+        console.log("=== useUserRole Debug ===");
+        console.log("User ID:", user?.id);
+        console.log("User email:", user?.email);
+
         if (!user) {
+          console.log("No user found");
           setRole(null);
           setLoading(false);
           return;
@@ -22,6 +27,9 @@ export const useUserRole = () => {
           .from("user_roles")
           .select("role")
           .eq("user_id", user.id);
+
+        console.log("Query result - data:", data);
+        console.log("Query result - error:", error);
 
         if (error) {
           console.error("Error fetching role:", error);
