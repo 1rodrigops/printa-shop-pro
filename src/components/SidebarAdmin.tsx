@@ -113,7 +113,7 @@ export default function SidebarAdmin() {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { role } = useUserRole();
+  const { role, loading } = useUserRole();
 
   const toggleSection = (sectionId: string) => {
     setOpenSection(openSection === sectionId ? null : sectionId);
@@ -142,7 +142,36 @@ export default function SidebarAdmin() {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const hasFullAccess = role && ["admin", "superadmin"].includes(role);
   const filteredMenuItems = menuItems.filter(item => hasAccess(item.roles));
+
+  if (loading) {
+    return (
+      <aside className="w-64 bg-gray-900 text-gray-400 p-4 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p>Carregando...</p>
+        </div>
+      </aside>
+    );
+  }
+
+  if (!hasFullAccess) {
+    return (
+      <aside className="w-64 bg-gray-900 text-gray-400 p-4 min-h-screen flex items-center justify-center">
+        <div className="text-center px-4">
+          <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-white text-lg font-bold mb-2">Acesso Restrito</h2>
+          <p className="text-sm mb-4">
+            Entre como administrador ou super administrador para visualizar o painel.
+          </p>
+          <p className="text-xs text-gray-500">
+            Sua role atual: {role || "sem permissão"}
+          </p>
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <>
