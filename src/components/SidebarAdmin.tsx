@@ -6,6 +6,7 @@ import {
   CreditCard, Database, Server, LogOut, ChevronDown, ChevronRight,
   Shirt, Truck, UserCog, Shield, Bell, AlertTriangle, Building2, Globe, Image
 } from "lucide-react";
+import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -84,6 +85,7 @@ const menuItems: MenuItem[] = [
       { label: "Fornecedores", path: "/admin/cadastro/fornecedores", roles: ["superadmin"] },
       { label: "Usuários", path: "/admin/cadastro/usuarios", roles: ["superadmin"] },
       { label: "Permissões", path: "/admin/cadastro/permissoes", roles: ["superadmin"] },
+      { label: "Módulos", path: "/admin/cadastro/modulos", roles: ["superadmin"] },
       { label: "Produtos", path: "/admin/cadastro/produtos", roles: ["superadmin", "admin"] },
     ],
   },
@@ -160,14 +162,41 @@ export default function SidebarAdmin() {
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [empresaModulos, setEmpresaModulos] = useState<string[]>([]);
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { role, loading, userEmail, debugInfo } = useUserRole();
+  const { role, loading, userEmail, debugInfo, empresaId } = useUserRole();
+  const { tenant } = useTenant();
 
   const hasFullAccess = useMemo(() => {
     return canSeeAdminPanel(role, userEmail || undefined);
   }, [role, userEmail]);
+
+  useEffect(() => {
+    const carregarModulos = async () => {
+      if (!empresaId && role !== "superadmin") return;
+
+      if (role === "superadmin" && tenant?.nome === "Grupo Agil") {
+        setEmpresaModulos(["cadastro", "vendas", "financeiro", "estoque", "relatorios", "utilidades", "meus_pedidos"]);
+        return;
+      }
+
+      if (empresaId) {
+        const { data, error } = await supabase
+          .from("empresa_modulos")
+          .select("modulo")
+          .eq("empresa_id", empresaId)
+          .eq("ativo", true);
+
+        if (!error && data) {
+          setEmpresaModulos(data.map(m => m.modulo));
+        }
+      }
+    };
+
+    carregarModulos();
+  }, [empresaId, role, tenant]);
 
   const toggleSection = (sectionId: string) => {
     setOpenSection(openSection === sectionId ? null : sectionId);
@@ -191,12 +220,31 @@ export default function SidebarAdmin() {
   };
 
   const hasAccess = (roles: string[]) => {
-    return role && roles.includes(role);
+    if (!role) return false;
+    if (!roles.includes(role)) return false;
+
+    if (role === "superadmin" && tenant?.nome === "Grupo Agil") {
+      return true;
+    }
+
+    return false;
+  };
+
+  const moduloAtivo = (moduloId: string) => {
+    if (role === "superadmin" && tenant?.nome === "Grupo Agil") {
+      return true;
+    }
+    return empresaModulos.includes(moduloId);
   };
 
   const isActive = (path: string) => location.pathname === path;
 
-  const filteredMenuItems = menuItems.filter(item => hasAccess(item.roles));
+  const filteredMenuItems = menuItems.filter(item => {
+    if (!hasAccess(item.roles)) return false;
+    if (item.id === "empresas") return role === "superadmin";
+    if (item.id === "cms") return role === "superadmin";
+    return moduloAtivo(item.id);
+  });
 
   if (loading) {
     return (

@@ -15,6 +15,7 @@ import Cadastro from "./pages/Cadastro";
 import CadastroClientes from "./pages/CadastroClientes";
 import CadastroUsuarios from "./pages/CadastroUsuarios";
 import Permissoes from "./pages/Permissoes";
+import Modulos from "./pages/Modulos";
 import Empresas from "./pages/Empresas";
 import Sites from "./pages/Sites";
 import Paginas from "./pages/Paginas";
@@ -59,6 +60,7 @@ const App = () => (
           <Route path="/admin/cadastro/clientes" element={<CadastroClientes />} />
           <Route path="/admin/cadastro/usuarios" element={<CadastroUsuarios />} />
           <Route path="/admin/cadastro/permissoes" element={<Permissoes />} />
+          <Route path="/admin/cadastro/modulos" element={<Modulos />} />
           <Route path="/admin/empresas" element={<Empresas />} />
           <Route path="/admin/sites" element={<Sites />} />
           <Route path="/admin/sites/:siteId/paginas" element={<Paginas />} />
