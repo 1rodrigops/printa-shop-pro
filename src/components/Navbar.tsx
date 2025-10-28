@@ -1,6 +1,7 @@
 import { ShoppingCart, Shirt } from "lucide-react";
 import { Button } from "./ui/button";
 import { Link, useLocation } from "react-router-dom";
+import { useTenantContext } from "@/contexts/TenantContext";
 
 interface NavbarProps {
   cartItemsCount?: number;
@@ -8,14 +9,24 @@ interface NavbarProps {
 
 const Navbar = ({ cartItemsCount = 0 }: NavbarProps) => {
   const location = useLocation();
+  const { tenant, branding } = useTenantContext();
+  const primaryColor = branding?.primary || "#111111";
+  const accentColor = branding?.accent || "#FF6A00";
   
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Shirt className="w-8 h-8 text-primary" />
-          <span className="text-xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-            StampShirts
+          <Shirt className="w-8 h-8" style={{ color: primaryColor }} />
+          <span
+            className="text-xl font-bold bg-clip-text text-transparent"
+            style={{
+              backgroundImage: `linear-gradient(to right, ${primaryColor}, ${accentColor})`,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            {tenant?.nome || "StampShirts"}
           </span>
         </Link>
         

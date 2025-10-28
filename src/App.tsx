@@ -19,6 +19,7 @@ import Empresas from "./pages/Empresas";
 import Sites from "./pages/Sites";
 import Paginas from "./pages/Paginas";
 import Midias from "./pages/Midias";
+import DynamicPage from "./pages/DynamicPage";
 import Produtos from "./pages/Produtos";
 import Vendas from "./pages/Vendas";
 import Pedidos from "./pages/Pedidos";
@@ -82,6 +83,7 @@ const App = () => (
           <Route path="/admin/utilidades/api-whatsapp" element={<ApiWhatsApp />} />
           <Route path="/admin/utilidades/logs-whatsapp" element={<LogsWhatsApp />} />
           <Route path="/meu-pedido" element={<MyOrder />} />
+          <Route path="/page/:slug" element={<DynamicPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
           </Routes>

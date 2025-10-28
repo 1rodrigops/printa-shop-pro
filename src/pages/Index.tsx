@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, Palette, Upload, ShoppingBag } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
+import { useTenantContext } from "@/contexts/TenantContext";
 import heroImage from "@/assets/hero-tshirts.jpg";
 import shirtModel1 from "@/assets/shirt-model-1.jpg";
 import shirtModel2 from "@/assets/shirt-model-2.jpg";
@@ -12,19 +13,23 @@ import fabricDryfit from "@/assets/fabric-dryfit.jpg";
 import fabricPremium from "@/assets/fabric-premium.jpg";
 
 const Index = () => {
+  const { tenant, branding } = useTenantContext();
+  const primaryColor = branding?.primary || "#111111";
+  const accentColor = branding?.accent || "#FF6A00";
+
   const features = [
     {
-      icon: <Upload className="w-8 h-8 text-primary" />,
+      icon: <Upload className="w-8 h-8" style={{ color: primaryColor }} />,
       title: "Envie Sua Foto",
       description: "Faça upload da imagem que você quer estampar na sua camisa"
     },
     {
-      icon: <Palette className="w-8 h-8 text-secondary" />,
+      icon: <Palette className="w-8 h-8" style={{ color: accentColor }} />,
       title: "Personalize",
       description: "Escolha cor, tamanho e quantidade da sua camisa"
     },
     {
-      icon: <ShoppingBag className="w-8 h-8 text-accent" />,
+      icon: <ShoppingBag className="w-8 h-8" style={{ color: primaryColor }} />,
       title: "Receba em Casa",
       description: "Produzimos e enviamos sua camisa personalizada"
     }
@@ -49,8 +54,15 @@ const Index = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <h1 className="text-5xl lg:text-7xl font-bold leading-tight">
-                Crie Sua
-                <span className="block bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+                {tenant?.nome || "Crie Sua"}
+                <span
+                  className="block bg-clip-text text-transparent"
+                  style={{
+                    backgroundImage: `linear-gradient(to right, ${primaryColor}, ${accentColor})`,
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
                   Camisa Perfeita
                 </span>
               </h1>
@@ -72,10 +84,15 @@ const Index = () => {
             </div>
             
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-3xl -z-10" />
-              <img 
-                src={heroImage} 
-                alt="Camisas personalizadas coloridas" 
+              <div
+                className="absolute inset-0 blur-3xl -z-10"
+                style={{
+                  background: `linear-gradient(to right, ${primaryColor}20, ${accentColor}20)`,
+                }}
+              />
+              <img
+                src={heroImage}
+                alt="Camisas personalizadas coloridas"
                 className="rounded-2xl shadow-2xl w-full"
               />
             </div>

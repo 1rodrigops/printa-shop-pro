@@ -43,7 +43,16 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Image as ImageIcon, Edit, Trash2, ExternalLink, Video } from "lucide-react";
+import { Image as ImageIcon, Edit, Trash2, ExternalLink, Video, Upload } from "lucide-react";
+import { ImageUpload } from "@/components/midias/ImageUpload";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const midiaSchema = z.object({
   empresa_id: z.string().uuid("Empresa inválida"),
@@ -406,6 +415,29 @@ const Midias = () => {
         }}
         headerActions={
           <div className="flex gap-2">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button size="sm" className="gap-2">
+                  <Upload className="w-4 h-4" />
+                  Upload Rápido
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-white">
+                <DialogHeader>
+                  <DialogTitle>Upload de Mídia</DialogTitle>
+                  <DialogDescription>
+                    Faça upload de uma imagem que será automaticamente adicionada à
+                    biblioteca.
+                  </DialogDescription>
+                </DialogHeader>
+                <ImageUpload
+                  onUploadComplete={(url) => {
+                    setValue("url", url);
+                    setValue("tipo", "imagem");
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
             <Button
               variant={viewMode === "grid" ? "default" : "outline"}
               size="sm"
