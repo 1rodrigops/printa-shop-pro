@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Customize from "./pages/Customize";
 import Shipping from "./pages/Shipping";
 import Auth from "./pages/Auth";
+import Setup from "./pages/Setup";
 import Admin from "./pages/Admin";
 import MyOrder from "./pages/MyOrder";
 import Reports from "./pages/Reports";
@@ -54,6 +55,7 @@ const App = () => (
           <Route path="/personalizar" element={<Customize />} />
           <Route path="/envio" element={<Shipping />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/setup" element={<Setup />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/cadastro" element={<Cadastro />} />
           <Route path="/admin/cadastro/clientes" element={<CadastroClientes />} />
