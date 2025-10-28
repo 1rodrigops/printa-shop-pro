@@ -3,7 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import AdminNavbar from "@/components/AdminNavbar";
+import { CadastroPageLayout } from "@/components/cadastro/CadastroPageLayout";
+import { CadastroFormCard } from "@/components/cadastro/CadastroFormCard";
+import { CadastroTable } from "@/components/cadastro/CadastroTable";
+import { CadastroPagination } from "@/components/cadastro/CadastroPagination";
+import { CadastroFormActions } from "@/components/cadastro/CadastroFormActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,14 +36,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAdminActivity } from "@/hooks/useAdminActivity";
 import {
-  Search,
   UserPlus,
   Edit,
   Trash2,
   Download,
-  ArrowLeft,
-  Save,
-  X,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -427,52 +427,19 @@ const CadastroClientes = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <AdminNavbar />
+    <CadastroPageLayout
+      title="Cadastro de Clientes"
+      subtitle="Gerencie o cadastro de clientes da empresa"
+      icon={UserPlus}
+      breadcrumb="Clientes"
+    >
 
-      <div className="container mx-auto px-4 pt-24 pb-8">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <span>Admin</span>
-          <span>/</span>
-          <span>Cadastro</span>
-          <span>/</span>
-          <span className="text-foreground font-medium">Clientes</span>
-        </div>
-
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-4">
-            <Button
-              onClick={() => navigate("/admin/cadastro")}
-              variant="outline"
-              size="icon"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold flex items-center gap-3">
-                <UserPlus className="h-8 w-8 text-primary" />
-                Cadastro de Clientes
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Gerencie o cadastro de clientes da empresa
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>
-              {editingCliente ? "Editar Cliente" : "Novo Cliente"}
-            </CardTitle>
-            <CardDescription>
-              {editingCliente
-                ? "Atualize as informações do cliente"
-                : "Preencha os dados para cadastrar um novo cliente"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <CadastroFormCard
+          title="Cliente"
+          description="do cliente"
+          editing={!!editingCliente}
+        >
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <Label htmlFor="nome_completo">
@@ -652,57 +619,37 @@ const CadastroClientes = () => {
                 />
               </div>
 
-              <div className="flex gap-3">
-                <Button type="submit" className="gap-2">
-                  <Save className="w-4 h-4" />
-                  {editingCliente ? "Atualizar Cliente" : "Salvar Cliente"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleClear}
-                  className="gap-2"
-                >
-                  <X className="w-4 h-4" />
-                  Limpar Campos
-                </Button>
-              </div>
+              <CadastroFormActions
+                editing={!!editingCliente}
+                onClear={handleClear}
+                submitLabel={editingCliente ? "Atualizar Cliente" : "Salvar Cliente"}
+              />
             </form>
-          </CardContent>
-        </Card>
+        </CadastroFormCard>
 
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <div>
-                <CardTitle>Clientes Cadastrados</CardTitle>
-                <CardDescription>
-                  {filteredClientes.length} cliente(s) encontrado(s)
-                </CardDescription>
-              </div>
-              <Button onClick={exportarCSV} variant="outline" className="gap-2">
-                <Download className="w-4 h-4" />
-                Exportar CSV
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar por nome, telefone, e-mail ou CPF/CNPJ..."
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            <div className="rounded-md border">
+        <CadastroTable
+          title="Clientes Cadastrados"
+          count={filteredClientes.length}
+          searchPlaceholder="Buscar por nome, telefone, e-mail ou CPF/CNPJ..."
+          searchTerm={searchTerm}
+          onSearchChange={(value) => {
+            setSearchTerm(value);
+            setCurrentPage(1);
+          }}
+          headerActions={
+            <Button onClick={exportarCSV} variant="outline" className="gap-2">
+              <Download className="w-4 h-4" />
+              Exportar CSV
+            </Button>
+          }
+          pagination={
+            <CadastroPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          }
+        >
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -762,34 +709,7 @@ const CadastroClientes = () => {
                   )}
                 </TableBody>
               </Table>
-            </div>
-
-            {totalPages > 1 && (
-              <div className="flex justify-center gap-2 mt-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                >
-                  Anterior
-                </Button>
-                <span className="flex items-center px-4 text-sm text-muted-foreground">
-                  Página {currentPage} de {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  Próxima
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+        </CadastroTable>
 
       <AlertDialog
         open={!!deletingCliente}
@@ -815,7 +735,7 @@ const CadastroClientes = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </CadastroPageLayout>
   );
 };
 

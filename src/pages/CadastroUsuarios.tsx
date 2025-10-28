@@ -3,7 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import AdminNavbar from "@/components/AdminNavbar";
+import { CadastroPageLayout } from "@/components/cadastro/CadastroPageLayout";
+import { CadastroFormCard } from "@/components/cadastro/CadastroFormCard";
+import { CadastroTable } from "@/components/cadastro/CadastroTable";
+import { CadastroPagination } from "@/components/cadastro/CadastroPagination";
+import { CadastroFormActions } from "@/components/cadastro/CadastroFormActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,13 +45,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { useUserRole, UserRole } from "@/hooks/useUserRole";
 import { useAdminActivity } from "@/hooks/useAdminActivity";
 import {
-  Search,
   UserCog,
   Edit,
   Trash2,
-  ArrowLeft,
-  Save,
-  X,
   Key,
   Shield,
 } from "lucide-react";
@@ -462,56 +462,20 @@ const CadastroUsuarios = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <AdminNavbar />
+    <CadastroPageLayout
+      title="Gerenciamento de Usuários do Sistema"
+      subtitle="Gerencie contas de acesso e permissões"
+      icon={UserCog}
+      breadcrumb="Usuários"
+    >
 
-      <div className="container mx-auto px-4 pt-24 pb-8">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <span>Admin</span>
-          <span>/</span>
-          <span>Cadastro</span>
-          <span>/</span>
-          <span className="text-foreground font-medium">Usuários</span>
-        </div>
-
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-4">
-            <Button
-              onClick={() => navigate("/admin/cadastro")}
-              variant="outline"
-              size="icon"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold flex items-center gap-3">
-                <UserCog className="h-8 w-8 text-primary" />
-                👥 Gerenciamento de Usuários do Sistema
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Gerencie contas de acesso e permissões
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Formulário */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              {editingUsuario ? "Editar Usuário" : "Novo Usuário"}
-            </CardTitle>
-            <CardDescription>
-              {editingUsuario
-                ? "Atualize as informações do usuário"
-                : "Preencha os dados para cadastrar um novo usuário"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <CadastroFormCard
+          title="Usuário"
+          description="do usuário"
+          icon={Shield}
+          editing={!!editingUsuario}
+        >
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <Label htmlFor="nome_completo">
@@ -614,53 +578,25 @@ const CadastroUsuarios = () => {
                 </div>
               </div>
 
-              <div className="flex gap-3">
-                <Button type="submit" className="gap-2">
-                  <Save className="w-4 h-4" />
-                  {editingUsuario ? "Atualizar Usuário" : "Salvar Usuário"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleClear}
-                  className="gap-2"
-                >
-                  <X className="w-4 h-4" />
-                  Limpar Campos
-                </Button>
-              </div>
+              <CadastroFormActions
+                editing={!!editingUsuario}
+                onClear={handleClear}
+                submitLabel={editingUsuario ? "Atualizar Usuário" : "Salvar Usuário"}
+              />
             </form>
-          </CardContent>
-        </Card>
+        </CadastroFormCard>
 
-        {/* Listagem */}
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <div>
-                <CardTitle>Usuários Cadastrados</CardTitle>
-                <CardDescription>
-                  {filteredUsuarios.length} usuário(s) encontrado(s)
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {/* Busca e Filtros */}
-            <div className="grid gap-4 md:grid-cols-3 mb-4">
-              <div className="relative md:col-span-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar por nome ou e-mail..."
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="pl-10"
-                />
-              </div>
-
+        <CadastroTable
+          title="Usuários Cadastrados"
+          count={filteredUsuarios.length}
+          searchPlaceholder="Buscar por nome ou e-mail..."
+          searchTerm={searchTerm}
+          onSearchChange={(value) => {
+            setSearchTerm(value);
+            setCurrentPage(1);
+          }}
+          filters={
+            <>
               <Select value={filterRole} onValueChange={setFilterRole}>
                 <SelectTrigger>
                   <SelectValue placeholder="Filtrar por função" />
@@ -683,10 +619,16 @@ const CadastroUsuarios = () => {
                   <SelectItem value="inativo">Inativo</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-
-            {/* Tabela */}
-            <div className="rounded-md border">
+            </>
+          }
+          pagination={
+            <CadastroPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          }
+        >
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -756,35 +698,7 @@ const CadastroUsuarios = () => {
                   )}
                 </TableBody>
               </Table>
-            </div>
-
-            {/* Paginação */}
-            {totalPages > 1 && (
-              <div className="flex justify-center gap-2 mt-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                >
-                  Anterior
-                </Button>
-                <span className="flex items-center px-4 text-sm text-muted-foreground">
-                  Página {currentPage} de {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  Próxima
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+        </CadastroTable>
 
       {/* Dialog de confirmação de exclusão */}
       <AlertDialog
@@ -833,7 +747,7 @@ const CadastroUsuarios = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </CadastroPageLayout>
   );
 };
 
