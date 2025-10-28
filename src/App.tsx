@@ -16,6 +16,8 @@ import CadastroClientes from "./pages/CadastroClientes";
 import CadastroUsuarios from "./pages/CadastroUsuarios";
 import Permissoes from "./pages/Permissoes";
 import Modulos from "./pages/Modulos";
+import ModulosPorEmpresa from "./pages/ModulosPorEmpresa";
+import SuperDashboard from "./pages/SuperDashboard";
 import Empresas from "./pages/Empresas";
 import Sites from "./pages/Sites";
 import Paginas from "./pages/Paginas";
@@ -56,6 +58,8 @@ const App = () => (
           <Route path="/envio" element={<Shipping />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/super-dashboard" element={<SuperDashboard />} />
+          <Route path="/admin/:empresaSlug/modulos" element={<ModulosPorEmpresa />} />
           <Route path="/admin/cadastro" element={<Cadastro />} />
           <Route path="/admin/cadastro/clientes" element={<CadastroClientes />} />
           <Route path="/admin/cadastro/usuarios" element={<CadastroUsuarios />} />

@@ -14,6 +14,7 @@ import type { User } from '@supabase/supabase-js';
 import { ActivityLog } from "@/components/admin/ActivityLog";
 import { ActivityStats } from "@/components/admin/ActivityStats";
 import { useAdminActivity } from "@/hooks/useAdminActivity";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface Order {
   id: string;
@@ -32,6 +33,7 @@ interface Order {
 
 const Admin = () => {
   const navigate = useNavigate();
+  const { role, loading: roleLoading, empresaSlug } = useUserRole();
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -39,6 +41,16 @@ const Admin = () => {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [period, setPeriod] = useState<"7d" | "30d" | "90d" | "all">("30d");
   const { logLogin } = useAdminActivity();
+
+  useEffect(() => {
+    if (!roleLoading) {
+      if (role === "superadmin") {
+        navigate("/admin/super-dashboard");
+      } else if (role === "admin" && empresaSlug) {
+        navigate(`/admin/${empresaSlug}/modulos`);
+      }
+    }
+  }, [role, roleLoading, empresaSlug, navigate]);
 
   const fetchOrders = async () => {
     setLoading(true);

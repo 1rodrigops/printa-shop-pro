@@ -13,6 +13,7 @@ export interface UseUserRoleReturn {
   loading: boolean;
   userEmail: string | null;
   empresaId: string | null;
+  empresaSlug: string | null;
   allRoles: UserRoleData[];
   hasRole: (role: UserRole, empresaId?: string) => boolean;
   debugInfo: {
@@ -27,6 +28,7 @@ export const useUserRole = (): UseUserRoleReturn => {
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
+  const [empresaSlug, setEmpresaSlug] = useState<string | null>(null);
   const [allRoles, setAllRoles] = useState<UserRoleData[]>([]);
   const [debugInfo, setDebugInfo] = useState<UseUserRoleReturn["debugInfo"]>({
     userId: null,
@@ -43,6 +45,7 @@ export const useUserRole = (): UseUserRoleReturn => {
           setRole(null);
           setUserEmail(null);
           setEmpresaId(null);
+          setEmpresaSlug(null);
           setAllRoles([]);
           setLoading(false);
           setDebugInfo({ userId: null, rawRoles: [], detectedRole: null });
@@ -67,6 +70,7 @@ export const useUserRole = (): UseUserRoleReturn => {
           console.error("❌ Error fetching role:", error);
           setRole(null);
           setEmpresaId(null);
+          setEmpresaSlug(null);
           setAllRoles([]);
           setDebugInfo({
             userId: user.id,
@@ -92,6 +96,19 @@ export const useUserRole = (): UseUserRoleReturn => {
 
           setRole(highestRole || null);
           setEmpresaId(primaryRoleData?.empresa_id || null);
+
+          if (primaryRoleData?.empresa_id) {
+            const { data: empresaData } = await supabase
+              .from("empresas")
+              .select("slug")
+              .eq("id", primaryRoleData.empresa_id)
+              .maybeSingle();
+
+            setEmpresaSlug(empresaData?.slug || null);
+          } else {
+            setEmpresaSlug(null);
+          }
+
           setDebugInfo({
             userId: user.id,
             rawRoles: data,
@@ -101,6 +118,7 @@ export const useUserRole = (): UseUserRoleReturn => {
           console.warn("⚠️ No roles found for user");
           setRole(null);
           setEmpresaId(null);
+          setEmpresaSlug(null);
           setAllRoles([]);
           setDebugInfo({
             userId: user.id,
@@ -112,6 +130,7 @@ export const useUserRole = (): UseUserRoleReturn => {
         console.error("❌ Exception fetching role:", error);
         setRole(null);
         setEmpresaId(null);
+        setEmpresaSlug(null);
         setAllRoles([]);
         setDebugInfo({
           userId: null,
@@ -144,5 +163,5 @@ export const useUserRole = (): UseUserRoleReturn => {
     return allRoles.some(r => r.role === checkRole);
   };
 
-  return { role, loading, userEmail, empresaId, allRoles, hasRole, debugInfo };
+  return { role, loading, userEmail, empresaId, empresaSlug, allRoles, hasRole, debugInfo };
 };
