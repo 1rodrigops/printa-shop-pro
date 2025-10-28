@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { 
-  UserPlus, 
-  DollarSign, 
-  CreditCard, 
-  Package, 
-  BarChart3, 
-  Settings, 
+import {
+  UserPlus,
+  DollarSign,
+  CreditCard,
+  Package,
+  BarChart3,
+  Settings,
   FileText,
   Bell,
   LogOut,
@@ -17,7 +17,9 @@ import {
   Users,
   Truck,
   UserCog,
-  Shield
+  Shield,
+  Building2,
+  Check
 } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -34,6 +36,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { useUserRole, UserRole } from "@/hooks/useUserRole";
+import { useTenantContext } from "@/contexts/TenantContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./ui/use-toast";
 import {
@@ -142,9 +145,32 @@ const AdminNavbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { role } = useUserRole();
+  const { tenant, switchTenant } = useTenantContext();
   const { toast } = useToast();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [empresas, setEmpresas] = useState<any[]>([]);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+
+  useEffect(() => {
+    if (role === "superadmin") {
+      fetchEmpresas();
+    }
+  }, [role]);
+
+  const fetchEmpresas = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("empresas")
+        .select("id, nome, slug")
+        .eq("status", "ativo")
+        .order("nome");
+
+      if (error) throw error;
+      setEmpresas(data || []);
+    } catch (error: any) {
+      console.error("Erro ao carregar empresas:", error);
+    }
+  };
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -257,8 +283,36 @@ const AdminNavbar = () => {
             })}
           </div>
 
-          {/* Right Side - Notifications & User */}
+          {/* Right Side - Tenant Selector, Notifications & User */}
           <div className="flex items-center gap-4">
+            {/* Tenant Selector (SuperAdmin only) */}
+            {role === "superadmin" && tenant && empresas.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="hidden lg:flex gap-2">
+                    <Building2 className="w-4 h-4" />
+                    <span className="max-w-[150px] truncate">{tenant.nome}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-white w-56">
+                  {empresas.map((empresa) => (
+                    <DropdownMenuItem
+                      key={empresa.id}
+                      onClick={() => switchTenant(empresa.slug)}
+                      className="cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span>{empresa.nome}</span>
+                        {tenant.id === empresa.id && (
+                          <Check className="w-4 h-4 text-primary" />
+                        )}
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
             {/* Notifications */}
             <Button variant="ghost" size="icon" className="relative hidden lg:flex">
               <Bell className="w-5 h-5" />

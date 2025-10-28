@@ -4,7 +4,7 @@ import {
   Users, Package, ClipboardList, FileText,
   ShoppingCart, BarChart3, Settings,
   CreditCard, Database, Server, LogOut, ChevronDown, ChevronRight,
-  Shirt, Truck, UserCog, Shield, Bell, AlertTriangle
+  Shirt, Truck, UserCog, Shield, Bell, AlertTriangle, Building2, Globe, Image
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -68,6 +68,13 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   {
+    id: "empresas",
+    icon: Building2,
+    label: "Empresas",
+    path: "/admin/empresas",
+    roles: ["superadmin"],
+  },
+  {
     id: "cadastro",
     icon: Users,
     label: "Cadastro",
@@ -78,6 +85,16 @@ const menuItems: MenuItem[] = [
       { label: "Usuários", path: "/admin/cadastro/usuarios", roles: ["superadmin"] },
       { label: "Permissões", path: "/admin/cadastro/permissoes", roles: ["superadmin"] },
       { label: "Produtos", path: "/admin/cadastro/produtos", roles: ["superadmin", "admin"] },
+    ],
+  },
+  {
+    id: "cms",
+    icon: Globe,
+    label: "CMS",
+    roles: ["superadmin", "admin"],
+    submenu: [
+      { label: "Sites", path: "/admin/sites", roles: ["superadmin", "admin"] },
+      { label: "Mídias", path: "/admin/midias", roles: ["superadmin", "admin"] },
     ],
   },
   {

@@ -16,6 +16,9 @@ import CadastroClientes from "./pages/CadastroClientes";
 import CadastroUsuarios from "./pages/CadastroUsuarios";
 import Permissoes from "./pages/Permissoes";
 import Empresas from "./pages/Empresas";
+import Sites from "./pages/Sites";
+import Paginas from "./pages/Paginas";
+import Midias from "./pages/Midias";
 import Produtos from "./pages/Produtos";
 import Vendas from "./pages/Vendas";
 import Pedidos from "./pages/Pedidos";
@@ -56,6 +59,9 @@ const App = () => (
           <Route path="/admin/cadastro/usuarios" element={<CadastroUsuarios />} />
           <Route path="/admin/cadastro/permissoes" element={<Permissoes />} />
           <Route path="/admin/empresas" element={<Empresas />} />
+          <Route path="/admin/sites" element={<Sites />} />
+          <Route path="/admin/sites/:siteId/paginas" element={<Paginas />} />
+          <Route path="/admin/midias" element={<Midias />} />
           <Route path="/admin/cadastro/produtos" element={<Produtos />} />
           <Route path="/admin/cadastro/fornecedores" element={<Fornecedores />} />
           <Route path="/admin/vendas" element={<Vendas />} />
