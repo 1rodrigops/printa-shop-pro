@@ -107,6 +107,89 @@ export type Database = {
         }
         Relationships: []
       }
+      empresa_modulos: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          empresa_id: string | null
+          id: string
+          modulo: string
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          empresa_id?: string | null
+          id?: string
+          modulo: string
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          empresa_id?: string | null
+          id?: string
+          modulo?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "empresa_modulos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      empresas: {
+        Row: {
+          cor_accent: string | null
+          cor_bg: string | null
+          cor_primary: string | null
+          cor_text: string | null
+          created_at: string | null
+          dominio: string | null
+          id: string
+          logo_url: string | null
+          metadata: Json | null
+          nome: string
+          slug: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cor_accent?: string | null
+          cor_bg?: string | null
+          cor_primary?: string | null
+          cor_text?: string | null
+          created_at?: string | null
+          dominio?: string | null
+          id?: string
+          logo_url?: string | null
+          metadata?: Json | null
+          nome: string
+          slug: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cor_accent?: string | null
+          cor_bg?: string | null
+          cor_primary?: string | null
+          cor_text?: string | null
+          created_at?: string | null
+          dominio?: string | null
+          id?: string
+          logo_url?: string | null
+          metadata?: Json | null
+          nome?: string
+          slug?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       fornecedor_historico: {
         Row: {
           created_at: string | null
@@ -214,6 +297,50 @@ export type Database = {
         }
         Relationships: []
       }
+      midias: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          empresa_id: string | null
+          id: string
+          nome: string
+          tags: string[] | null
+          tipo: string
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          empresa_id?: string | null
+          id?: string
+          nome: string
+          tags?: string[] | null
+          tipo: string
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          empresa_id?: string | null
+          id?: string
+          nome?: string
+          tags?: string[] | null
+          tipo?: string
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "midias_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       movimentacoes_estoque: {
         Row: {
           created_at: string | null
@@ -317,6 +444,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      paginas: {
+        Row: {
+          conteudo_json: Json | null
+          created_at: string | null
+          id: string
+          site_id: string | null
+          slug: string
+          status: string | null
+          titulo: string
+          updated_at: string | null
+        }
+        Insert: {
+          conteudo_json?: Json | null
+          created_at?: string | null
+          id?: string
+          site_id?: string | null
+          slug: string
+          status?: string | null
+          titulo: string
+          updated_at?: string | null
+        }
+        Update: {
+          conteudo_json?: Json | null
+          created_at?: string | null
+          id?: string
+          site_id?: string | null
+          slug?: string
+          status?: string | null
+          titulo?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paginas_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payment_logs: {
         Row: {
@@ -746,6 +914,47 @@ export type Database = {
         }
         Relationships: []
       }
+      sites: {
+        Row: {
+          created_at: string | null
+          dominio: string | null
+          empresa_id: string | null
+          id: string
+          nome: string
+          slug: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          dominio?: string | null
+          empresa_id?: string | null
+          id?: string
+          nome: string
+          slug: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          dominio?: string | null
+          empresa_id?: string | null
+          id?: string
+          nome?: string
+          slug?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sites_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_config: {
         Row: {
           config_category: string
@@ -782,23 +991,34 @@ export type Database = {
       user_roles: {
         Row: {
           created_at: string | null
+          empresa_id: string | null
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
           created_at?: string | null
+          empresa_id?: string | null
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
           created_at?: string | null
+          empresa_id?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       whatsapp_message_logs: {
         Row: {
